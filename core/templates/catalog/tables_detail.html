@@ -1,0 +1,44 @@
+{{block_detail}}
+<button type="button" class="yoo-card-btn" data-toggle="modal" data-target="#{{ table.Name}}"><ion-icon name="code"></ion-icon></button>
+
+  <!-- Code Modal -->
+  <div class="modal fade" id="{{table.Name}}">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title">Details {{table.Name}}</h6>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table>
+            <thead>
+              <tr>
+                <td>Rows</td>
+                <td>DataSizeMB</td>
+                <td>IndexSize</td>
+                <td>LastUse</td>
+              </tr>
+            </thead>
+            <tbody>
+              <td>Rows</td>
+                <td>DataSizeMB</td>
+                <td>IndexSize</td>
+                <td>LastUse</td>
+
+            </tbody>
+          </table>
+<!--                      -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+{{endblock }}

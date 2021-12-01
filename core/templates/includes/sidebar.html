@@ -1,0 +1,65 @@
+
+  <div class="yoo-sidebarheader-toggle">
+    <div class="yoo-button-bar1"></div>
+    <div class="yoo-button-bar2"></div>
+    <div class="yoo-button-bar3"></div>
+  </div><!-- .yoo-sidebarheader-toggle -->
+  <div class="yoo-sidebarheader">
+
+    <!-- SIDEBAR MENU-->
+    <div class="yoo-sidebarheader-in" data-scrollbar>
+      <div class="yoo-sidebar-search">
+        <form action="#" class="yoo-search yoo-style1 yoo-search-md">
+          <input type="text" placeholder="Search..." class="yoo-search-input">
+          <button class="yoo-search-submit"><ion-icon name="search"></ion-icon></button>
+          <button class="yoo-voice-btn"><ion-icon name="mic"></ion-icon></button>
+        </form>
+      </div>
+      <!-- SIDEBAR-->
+      <div class="yoo-sidebar-nav">
+        <ul class="yoo-sidebar-nav-list yoo-mp0">
+          <li class="active">
+            <a href="/">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="layers"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Dashboard</span>
+              </span>
+            </a>
+          </li>
+           <!---->
+          <!-- SIDE BAR ITEM-->
+          <li>
+       
+            <a href="/servers/new/">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="desktop"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Servers</span>
+              </span>
+            </a>
+          </li>
+          <!-- SIDE BAR ITEM-->
+           <!-- SIDE BAR ITEM-->
+          <li>
+       
+            <a href="/tables/">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="grid"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Tables</span>
+              </span>
+            </a>
+          </li>
+          <!-- SIDE BAR ITEM-->
+
+         
+          <li>
+            <a href={% url 'logout' %} >
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="log-out-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Logout</span>
+              </span>
+            </a>
+          </li> 
+        </ul><!-- .yoo-sidebar-nav-list -->
+      </div>
+    </div>
+  </div><!-- .yoo-sidebarheader -->

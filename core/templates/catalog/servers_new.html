@@ -1,0 +1,71 @@
+{% extends "layouts/base.html" %}
+{% load floppyforms %}
+
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+  <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div>
+<div class="container"> <!--Title -->
+    <div class="yoo-uikits-heading">
+        <h2 class="yoo-uikits-title">New Server</h2>
+    </div>
+</div> <!-- title-->
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div> <!-- Contenido-->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!--Header and Modal info -->
+                {% include 'catalog/servers_new_info.html' %}
+                <!--   - - - - - - - --   -->
+                <div class="yoo-card-body">
+                    <div class="yoo-padd-lr-20">
+                      <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+                        <form method="post">{% csrf_token %}
+                        {{ form.as_p }}
+
+                        <input type="submit" value="Save">
+                        </form>
+                      
+                      <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+                    </div>
+                  </div>
+               
+
+                <div class="yoo-height-b20 yoo-height-lg-b20"></div><!--footer card-->
+            </div>
+        </div> <!---row-->
+    </div><!-- container  -->
+</div><!-- contenido -->
+
+
+<!--
+</div>
+</div> -->
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div> <!-- outer card-->
+
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="/static/assets/js/apexcharts.min.js"></script>
+<script src="/static/assets/js/apexcharts.initialize.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.min.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.usa.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.main.js"></script>
+
+{% endblock javascripts %}
