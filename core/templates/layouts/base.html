@@ -7,6 +7,18 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="YooKits" />
+  <!-- Alert-->
+  
+  {% load static%}
+  <script type='text/javascript' src="/static/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+  <script type='text/javascript' src="{% static 'jquery.formset.js' %}"></script>
+  <script>var $jq3 = jQuery.noConflict();</script>
+  
+  <script src="/static/assets/js/jquery-1.12.4.min.js"></script> 
+  
+  <!---->
   <!-- Page Title -->
   <title>
     Infraestructura - {% block title %}{% endblock %} | IEEPO   
@@ -23,7 +35,7 @@
 
 </head>
 
-<body>
+<body >
 
   {% include 'includes/navigation.html' %}
 
@@ -42,7 +54,7 @@
   <!-- Specific Page JS goes HERE  -->
   {% block javascripts %}{% endblock javascripts %}
 
-  <!-- <script src="/static/assets/js/jquery.dataTables.min.js"></script> -->
+   <!-- <script src="/static/assets/js/jquery.dataTables.min.js"></script>  -->
   <script src="/static/assets/js/iDashboard.js"></script>
   <script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
   

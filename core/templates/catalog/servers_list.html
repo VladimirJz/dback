@@ -1,23 +1,18 @@
 {% extends "layouts/base.html" %}
-view.template_name
+{% load floppyforms %}
 {% load core_extras %}
-
 {% block title %} Dashboard {% endblock %} 
-
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-
   <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
-
 {% endblock stylesheets %}
 
 {% block content %}
 
-
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
 <div class="container">
   <div class="yoo-uikits-heading">
-    <h2 class="yoo-uikits-title">Listado de Tablas</h2>
+    <h2 class="yoo-uikits-title">All Database Servers</h2>
   </div>
 </div>
 
@@ -25,47 +20,54 @@ view.template_name
 <div class="container">
   <div class="row">
     <div class="col-lg-12">
-        <!--Header and Modal info -->
-        {{ view.template_name }}
-        {{get_template_names()}
+                <!--Header and Modal info -->
+                {% with template_info=view.template_name|slice:'-5'|addstr:'_info.html'     %}
+                {% include template_info  %}
+                {% endwith %}
+      
+                <!--   - - - - - - - --   -->
 
-        {{app}}
-        {{view}}
-  
-        <!--   - - - - - - - --   -->
-
-        <!--TABLE-->
+        <!--server-->
         <div class="yoo-card-body">
+          {% include 'includes/messages.html' %}
           <div class="yoo-padd-lr-20">
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Schema</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Create Date</th>
-                  <th scope="col">Category</th>
+                  <th scope="col">id</th>
+                  <th scope="col">Server</th>
+                  <th scope="col">Host</th>
+                  <th scope="col">Instance</th>
+                  <th scope="col">Port</th>
+                  <th scope="col"></th>
                   <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
-                {% for table in tables_list %}
+                {% for server in servers_list %}
                 <tr>
-                  <th scope="row">{{ table.id}}</th>
-                  <td>{{ table.Schema}}</td>
-                  <td>{{ table.Name}}</td>
-                  <td>{{ table.CreateDate}}</td>
-                  <td>{{ table.TableCategory__Category}}</td>
+                  <th scope="row">{{ server.id}}</th>
+                  <td>{{ server.Server}}</td>
+                  <td>{{ server.Host}}</td>
+                  <td>{{ server.Instance}}</td>
+                  <td>{{ server.Port}}</td>
                   <td>{% include 'catalog/tables_detail.html' %}</td>
+                  <td> 
+                    <button type="button" onclick="location.href='/servers/update/{{server.id}}';" class="yoo-card-btn"><ion-icon name="create-outline"></ion-icon></button>
+                  </td>
                 </tr>
 
                 {% endfor %}
 
               </tbody>
             </table>
-            <!-- tables end-->
+            <!-- table end-->
             
+            <div class="modal-footer">
+              <button type="button" onclick="location.href='/servers/new/'" class="btn btn-success" data-dismiss="modal">New</button>
+            </div>
+
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
           </div>
         </div>

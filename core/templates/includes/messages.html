@@ -1,0 +1,11 @@
+{{block_messages}}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{message.tags}}" role="alert">
+  {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+  {{message}} 
+  <a href="{{go_back}}" class="alert-link">Go back</a>
+</div>
+  {% endfor %}
+{% endif %}
+{{endblock}}

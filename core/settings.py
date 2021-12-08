@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'floppyforms',
+    'core',
     'app',  # Enable the inner app ,
     'app.catalog'
 ]

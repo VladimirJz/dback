@@ -2,7 +2,6 @@
 {% load floppyforms %}
 {% load core_extras %}
 
-
 {% block title %} Dashboard {% endblock %} 
 
 <!-- Specific CSS goes HERE -->
@@ -18,7 +17,7 @@
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
 <div class="container"> <!--Title -->
     <div class="yoo-uikits-heading">
-        <h2 class="yoo-uikits-title">Database Servers</h2>
+        <h2 class="yoo-uikits-title">Server Details</h2>
     </div>
 </div> <!-- title-->
 
@@ -35,13 +34,7 @@
                   {% include 'includes/messages.html' %}
                    <div class="yoo-padd-lr-20"> <!-- ident -->
                       <div class="yoo-height-b20 yoo-height-lg-b20"></div>
-                        <form method="post">
-                          {% csrf_token %}
-                          {{form.as_p}}
-                        <input type="submit" class="btn btn-primary" value="Save">
-                        <button type="button" onclick="location.href='/servers/';" class="btn btn-secondary">Cancel</button>
-                      </form>
-                      
+                      {{ server_detail }}
                       <div class="yoo-height-b20 yoo-height-lg-b20"></div>
                     </div>
                   </div>

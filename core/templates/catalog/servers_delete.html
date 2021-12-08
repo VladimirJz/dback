@@ -2,18 +2,18 @@
 {% load floppyforms %}
 {% load core_extras %}
 
-
-{% block title %} Dashboard {% endblock %} 
+{% block title %} Servers details {% endblock %} 
 
 <!-- Specific CSS goes HERE -->
+
 {% block stylesheets %}
 
   <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
-
+  
 {% endblock stylesheets %}
 
 {% block content %}
-
+<!-- load-->
 
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
 <div class="container"> <!--Title -->
@@ -35,16 +35,37 @@
                   {% include 'includes/messages.html' %}
                    <div class="yoo-padd-lr-20"> <!-- ident -->
                       <div class="yoo-height-b20 yoo-height-lg-b20"></div>
-                        <form method="post">
-                          {% csrf_token %}
-                          {{form.as_p}}
-                        <input type="submit" class="btn btn-primary" value="Save">
-                        <button type="button" onclick="location.href='/servers/';" class="btn btn-secondary">Cancel</button>
-                      </form>
-                      
+                          <form id="update"method="post">
+                            {% csrf_token %}
+
+                            <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading">Are tu sure?</h4>
+                            <p>The server  {{server_delete.Server}}/ {{server_delete.Instance}} will be removed
+                              <li>All data history will be erased</li>
+                              <li>{{server_delete.Type}}</li>
+                              <li>All related configuration will be removed</li>
+                            <hr>
+                            <p class="mb-0">There is no way back.</p>
+                            </div>
+                            
+                            <div class="row">
+                              <div class="col">
+                                  <input type="submit" class="btn btn-danger" value="Confirm">
+                                  <button type="button" onclick="location.href='/servers/';" class="btn btn-secondary">Cancel</button>
+                              </div>
+                              <div class="col-md-auto">
+                              
+                              </div>
+                              <div  style="display: flex; justify-content: flex-end"  class="col col-lg-2" >
+                              </div>
+                            </div>
+                          </div>
+      
+                        </form>
                       <div class="yoo-height-b20 yoo-height-lg-b20"></div>
                     </div>
                   </div>
+
                 <div class="yoo-height-b20 yoo-height-lg-b20"></div><!--footer card-->
             </div>
         </div> <!---row-->
@@ -64,6 +85,10 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<script type="text/javascript"/>
+
+
+</script>
 
 <script src="/static/assets/js/apexcharts.min.js"></script>
 <script src="/static/assets/js/apexcharts.initialize.js"></script>

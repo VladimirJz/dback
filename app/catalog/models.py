@@ -16,11 +16,11 @@ class Servers(models.Model):
     Instance=CharField(max_length=50,help_text='Instance Name')
     Port=IntegerField(help_text='Port Number')
     DBMS_TYPES = [(1, 'MS SQLServer'),(2,'MySQL/MariaDB'),(3, 'PostgreSQL')];
-    Type= models.SmallIntegerField(choices=DBMS_TYPES,default=1);
+    Type= models.SmallIntegerField(choices=DBMS_TYPES,default=1,help_text='Type of Server');
     SERVER_ENV = [(1, 'Production'),(2,'QA'),(3, 'Development')];
-    Environment =models.SmallIntegerField(choices=SERVER_ENV,default=1)
+    Environment =models.SmallIntegerField(choices=SERVER_ENV,default=1,help_text='Database Enviroment')
     SERVER_STATUS = [(1, 'Active'),(2,'Inactive'),(3,'Inaccessible')];
-    Status= models.SmallIntegerField(choices=SERVER_STATUS,default=1);
+    Status= models.SmallIntegerField(choices=SERVER_STATUS,default=1,help_text='Server status');
     def __str__(self):
         return self.Server
 
