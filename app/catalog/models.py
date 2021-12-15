@@ -4,6 +4,7 @@ from django.db import models
 
 
 from django.db import models
+from datetime import date
 from django.contrib.auth.models import User
 from django.db.models.base import Model
 from django.db.models.fields import CharField, DateField, DecimalField, IntegerField
@@ -23,9 +24,19 @@ class Servers(models.Model):
     Status= models.SmallIntegerField(choices=SERVER_STATUS,default=1,help_text='Server status');
     def __str__(self):
         return self.Server
+    def get_absolute_url(self):
+        return "/servers/update/%i" % self.id
 
 class DataBases(models.Model):
     Database=CharField(max_length=50,help_text='Database Name')
+    FriendlyName=CharField(max_length=50,help_text='Friendly Name',null=True)
+    Description=CharField(max_length=200,help_text='Database description',null=True)
+    CreateDate=DateField(help_text='Create date',default=date.today)
+    DataSizeMB=IntegerField(help_text='Data size storage',default=0)
+    IndexSizeMB=IntegerField(help_text='Index size storage',default=0)
+    TablesNum=IntegerField(help_text='Number of tables',default=0)
+    ViewsNum=IntegerField(help_text='Number of views',default=0)
+    RoutinesNum=IntegerField(help_text='Number of routines',default=0)
     Server=ForeignKey(Servers,on_delete=models.SET_NULL,null=True)
     def __str__(self):
         return self.Database

@@ -40,3 +40,31 @@ from  DBPROD.obj.TABLES
 -- remove
     <label for="{{ field|id }}">{% endif %}{{ label }}{% if label|last not in ".:!?" %}{% if not field.field.label_suffix|isnone %}{{ field.field.label_suffix }}{% else %}{{ form.label_suffix }}{% endif %}{% endif %}{% if field|id %}        
     </label>
+
+
+    
+INSERT INTO [dbo].[tracking_tablesdetail]
+           ([CurrentDate]
+           ,[DataSizeMB]
+           ,[IndexSizeMB]
+           ,[RowsNum]
+           ,[FKeysNum]
+           ,[IndexNum]
+           ,[IndexReads]
+           ,[IndexUpdates]
+		   ,[LastAccess]
+           ,[Table_id])
+  SELECT     
+       [CurrentDate]
+      ,[DataSizeMb]
+      ,[IndexSizeMb]
+      ,[NumRows]
+      ,[NumFKeys]
+      ,[NumIndexes]
+      ,[UsageIndex]
+      ,[UpdatesIndex]
+      ,[LastUse]
+	  ,[TableID]
+  FROM DBPROD.[dbo].[TABLESDETAIL]
+  where CurrentDate='2021-11-25'
+

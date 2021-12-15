@@ -1,0 +1,176 @@
+{% extends "layouts/base.html" %}
+{% load floppyforms %}
+{% load core_extras %}
+{% load humanize %}
+
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+  <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div>
+<div class="container"> <!--Title -->
+    <div class="yoo-uikits-heading">
+        <h2 class="yoo-uikits-title">{{ table_detail.Table__Name }}</h2>
+    </div>
+</div> <!-- title-->
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div> <!-- Contenido-->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!--Header and Modal info -->
+                {% with template_info=view.template_name|slice:'-5'|addstr:'_info.html'     %}
+                {% include template_info  %}
+                {% endwith %}
+                <!--   - - - - - - - --   -->
+                <div class="yoo-card-body">
+                  {% include 'includes/messages.html' %}
+                  <div class="yoo-padd-lr-20"> <!-- ident -->
+                      <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+                      <!--body-->
+
+                      <form id="info">
+
+                        <div class="form-row yoo-padd-lr-20 ">
+                            <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >ID:</label></div>
+                            <div class="form-group col-md-2">
+                              <div class ="input-group form-group-sm">
+                                <input type="text" class="form-control"  readonly value="{{ table_detail.Table_id }}">
+                              </div>
+                            </div>
+                            <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Name:</label></div>
+                            <div class="form-group col-md-4">
+                              <div class ="input-group form-group-sm">
+                                <input type="text" class="form-control"  readonly value="{{ table_detail.Table__Name }}">
+                              </div>
+                            </div>
+                        </div><!-- row -->
+                       
+                        <div class="form-row yoo-padd-lr-20 ">
+                          <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Category:</label></div>
+                          <div class="form-group col-md-4">
+                            <div class ="input-group form-group-sm">
+                              <input type="text" class="form-control"  readonly value="{{ table_detail.Table__TableCategory__Category }}">
+                            </div>
+                          </div>
+                          <div class="form-group col-md-1"></div><!--spacer-->
+                          <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Create_at:</label></div>
+                          <div class="form-group col-md-2">
+                            <div class ="input-group form-group-sm">
+                              <input type="text" class="form-control"  readonly value="{{ table_detail.Table__CreateDate }}">
+                            </div>
+                          </div>
+                          <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Last_Read:</label></div>
+                          <div class="form-group col-md-2">
+                            <div class ="input-group form-group-sm">
+                              <input type="text" class="form-control"  readonly value="{{ table_detail.LastAccess }}">
+                            </div>
+                          </div>
+
+
+                      </div><!-- row -->
+                      <div class="form-row yoo-padd-lr-20 ">
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Data_SizeMB:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.DataSizeMB | intcomma }}">
+                          </div>
+                        </div>
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >IndexSizeMB:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.IndexSizeMB | intcomma }}">
+                          </div>
+                        </div>
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Index:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.IndexNum  }}">
+                          </div>
+                        </div>  
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Foreing_Keys:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.FKeysNum  }}">
+                          </div>
+                        </div>
+
+                      </div><!-- row -->
+                      <div class="form-row yoo-padd-lr-20 ">
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >Index_Reads:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.IndexReads | intcomma }}">
+                          </div>
+                        </div>
+                        <div class="form-group col-md-1"><label class="yoo-form-field-label yoo-type1" >IndexUpdates:</label></div>
+                        <div class="form-group col-md-2">
+                          <div class ="input-group form-group-sm">
+                            <input type="text" class="form-control"  readonly value="{{ table_detail.IndexUpdates | intcomma }}">
+                          </div>
+                        </div>
+                        <div class="form-group col-md-5"></div><!--spacer-->
+                      
+
+
+
+                        {{table_detail.Table__TableCategory__Category }}
+                        {{ table_detail.TableCategory.Category }}
+
+
+
+
+
+
+          
+                          
+                      
+                      </form>
+                      <div class="form-group col-md-5"></div><!--spacer-->
+                      <div class="form-group col-md-5"></div><!--spacer-->
+                      <div class="form-group col-md-5"></div><!--spacer-->
+              
+ 
+
+
+
+
+                      <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+                  </div><!--ident -->
+                  <!-- </div> de mas-->
+                <div class="yoo-height-b20 yoo-height-lg-b20"></div><!--footer card-->
+            </div>
+        </div> <!---row-->
+    </div><!-- container  -->
+</div><!-- contenido -->
+
+
+<!--
+</div>
+</div> -->
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div> <!-- outer card-->
+
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="/static/assets/js/apexcharts.min.js"></script>
+<script src="/static/assets/js/apexcharts.initialize.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.min.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.usa.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.main.js"></script>
+
+{% endblock javascripts %}

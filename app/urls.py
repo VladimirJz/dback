@@ -6,6 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 from django.urls import path, re_path
 from app import views
+#from app.tracking.views import TablesDetailView
 
 urlpatterns = [
     # Matches any html file - to be used for gentella
@@ -15,4 +16,5 @@ urlpatterns = [
 
     # The home page
     path('', views.index, name='home'),
+
 ]

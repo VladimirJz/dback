@@ -18,39 +18,70 @@
       <!-- SIDEBAR-->
       <div class="yoo-sidebar-nav">
         <ul class="yoo-sidebar-nav-list yoo-mp0">
-          <li class="active">
-            <a href="/">
+       <!--Main Menu --> 
+       <li class="yoo-sidebar-has-children"  {% if app == "catalog" %}class="active"{% endif%}>
+        <a href="#" >
+          <span class="yoo-sidebar-link-title">
+            <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="cog-outline"></ion-icon></span>
+            <span class="yoo-sidebar-link-text">Catalog</span>
+          </span>
+        </a>
+        <ul class="yoo-sidebar-nav-dropdown">
+          <!-- sub Menu-->  
+          <li >
+            <a href="#">
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="layers"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Dashboard</span>
               </span>
             </a>
           </li>
-           <!---->
-          <!-- SIDE BAR ITEM-->
-          <li>
-       
+          <!-- sub Menu -->
+          <li {% if menu == "servers" %}class="active"{% endif%}>       
             <a href="/servers/">
               <span class="yoo-sidebar-link-title">
-                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="desktop"></ion-icon></span>
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="reader-outline"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Servers</span>
               </span>
             </a>
           </li>
-          <!-- SIDE BAR ITEM-->
-           <!-- SIDE BAR ITEM-->
-          <li>
-       
-            <a href="/tables/">
+          <!-- sub Menu -->
+          <li {% if menu == "databases" %}class="active"{% endif%}>       
+            <a href="{%url 'catalog_databaseslist' %}">
               <span class="yoo-sidebar-link-title">
-                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="grid"></ion-icon></span>
-                <span class="yoo-sidebar-link-text">Tables</span>
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="server-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Databases</span>
               </span>
             </a>
           </li>
-          <!-- SIDE BAR ITEM-->
+       
+        </ul>
+      </li>
+      <!-- << Main Menu --> 
 
-         
+      <!--Main Menu --> 
+      <li class="yoo-sidebar-has-children"  {% if app == "tracking" %}class="active"{% endif%}>
+      <a href="#" >
+        <span class="yoo-sidebar-link-title">
+          <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="newspaper-outline"></ion-icon></span>
+          <span class="yoo-sidebar-link-text">Logdata</span>
+        </span>
+      </a>
+      <ul class="yoo-sidebar-nav-dropdown">
+        <!-- sub Menu-->  
+        <li >
+          <a href="{%url 'tracking_databaseslist' %}">
+            <span class="yoo-sidebar-link-title">
+              <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="documents-outline"></ion-icon></span>
+              <span class="yoo-sidebar-link-text">Tables</span>
+            </span>
+          </a>
+        </li> 
+      </ul>
+      </li>
+      
+        
+          <!-- SIDE BAR ITEM-->         
           <li>
             <a href={% url 'logout' %} >
               <span class="yoo-sidebar-link-title">

@@ -4,14 +4,19 @@
     <div class="yoo-main-header">
       <div class="yoo-main-header-in">
         <div class="yoo-main-header-left">
-          <!-- <a href="https://appseed.us/admin-dashboards/django-idashboard-free"
+            <a href="#"
              target="_blank" 
              class="yoo-logo-link yoo-light-logo">
-             <img src=""/static/assets/img/logo.svg"" alt="logo-light" /></a>  -->
-            
+             <img src="/static/assets/img/logo.svg" alt="logo-light" /></a>  
+             <p class="text-white"> IEEPO </p>
+
+
             <!-- For Site Title -->
            <span class="yoo-site-title">
-            <a href="index.html">DBAR</a>
+          
+            <p class="text-white"> DB  </p>
+
+             
           </span> 
         </div>
 
@@ -211,11 +216,12 @@
                   <div class="yoo-profile-nav-text">
                     <span>Welcome,</span>
                     <h4>
-                        {{ request.user.username }}
+                        {{ request.user.username  }}
                     </h4>
                   </div>
                   <div class="yoo-profile-nav-img">
-                    <img src="/static/assets/img/profile-pic.png" alt="profile">
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.username  }}" alt="profile"
+                    <!-- <img src="/static/assets/img/profile-pic.png" alt="profile"> -->
                   </div>
                 </div>
                 <ul class="yoo-dropdown yoo-style1">

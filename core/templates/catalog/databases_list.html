@@ -1,13 +1,10 @@
 {% extends "layouts/base.html" %}
 {% load floppyforms %}
 {% load core_extras %}
-{% block title %} Tables list {% endblock %} 
-
+{% block title %} Dashboard {% endblock %} 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-
   <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
-
 {% endblock stylesheets %}
 
 {% block content %}
@@ -15,17 +12,17 @@
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
 <div class="container">
   <div class="yoo-uikits-heading">
-    <h2 class="yoo-uikits-title">Listado de Tablas</h2>
+    <h2 class="yoo-uikits-title">All Databases</h2>
   </div>
 </div>
 
+
+{{app}}
+{{current_url}}
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
 <div class="container">
   <div class="row">
     <div class="col-lg-12">
-    
-        <!--Header and Modal info -->
-
                 <!--Header and Modal info -->
                 {% with template_info=view.template_name|slice:'-5'|addstr:'_info.html'     %}
                 {% include template_info  %}
@@ -33,39 +30,35 @@
       
                 <!--   - - - - - - - --   -->
 
-        <!--TABLE-->
+        <!--database-->
         <div class="yoo-card-body">
+          {% include 'includes/messages.html' %}
           <div class="yoo-padd-lr-20">
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
             <table class="table table-hover">
               <thead>
                 <tr>
-                  <th scope="col">ID</th>
-                  <th scope="col">Schema</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Create Date</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Category</th>
-                  <th scope="col">Data Size MB</th>
+                  <th scope="col">id</th>
+                  <th scope="col">Database</th>
+                  <th scope="col">Friendly Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Server</th>
                   <th scope="col"></th>
                   <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
-                {% for table in tables_list %}
+                {% for database in databases_list %}
                 <tr>
-                  <th scope="row">{{ table.id}}</th>
-                  <td>{{ table.Schema}}</td>
-                  <td>{{ table.Name}}</td>
-                  <td>{{ table.CreateDate}}</td>
-                  <td>{{ table.get_Status_display }}</td>
-                  <td>{{ table.TableCategory__Category}}</td>
-                  <td>{{ table.DetailOf__DataSizeMB  }} </td>
-                  <td>{% include 'catalog/tables_detail.html' %}</td>
-                  <td>
-                    <button type="button" onclick="location.href='{% url 'tabledetail' table.id %}';" class="yoo-card-btn"><ion-icon name="pulse-outline"></ion-icon></button>
-
-
+                  <th scope="row">{{ database.id}}</th>
+                  <td>{{ database.Database}}</td>
+                  <td>{{ database.FriendlyName}}</td>
+                  <td>{{ database.Description}}</td>
+                  <td>{{ database.Server}}</td>
+                  <td></td>
+                  <td><div class="form-row">
+                    <button type="button" onclick="location.href='{% url 'tableslist' database.id %}'" class="yoo-card-btn"><ion-icon name="document-outline"></ion-icon></button> 
+                    <button type="button" onclick="location.href='{% url 'catalog_serverupdate' database.id %}';" class="yoo-card-btn"><ion-icon name="create-outline"></ion-icon></button></div>
                   </td>
                 </tr>
 
@@ -73,8 +66,10 @@
 
               </tbody>
             </table>
-            <!-- tables end-->
+            <!-- table end-->
             
+
+
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
           </div>
         </div>

@@ -31,10 +31,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'floppyforms',
     'core',
     'app',  # Enable the inner app ,
-    'app.catalog'
+    'app.catalog',
+    'app.tracking'
 ]
 
 MIDDLEWARE = [
