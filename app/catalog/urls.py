@@ -12,15 +12,15 @@ urlpatterns = [
 
     # The home page
 
-    path('servers/',ServerListView.as_view(template_name='catalog/servers_list.html'),name='serverslist'),
-    path('servers/new/',ServerCreateView.as_view(),name='servernew'),
-    path('servers/detail/<int:pk>', ServerDetailView.as_view(), name="serverdetails"),
-    path('servers/update/<int:pk>',ServerUpdateView.as_view(),name="catalog_serverupdate"),
-    path('servers/delete/<int:pk>', ServerDeleteView.as_view(),name="serverdelete"),
-    path('servers/database/',DataBaseListView.as_view(),name='catalog_databaseslist'),
-    path('databases/',DataBaseListView.as_view(),name='tracking_databaseslist'),
+    path('servers/',ServerListView.as_view(template_name='catalog/servers_list.html'),name='servers'), #serverlist
+    path('servers/new/',ServerCreateView.as_view(),name='servers_new'),#servernew
+    path('servers/detail/<int:pk>', ServerDetailView.as_view(), name="servers_details"),#serverdetails
+    path('servers/update/<int:pk>',ServerUpdateView.as_view(),name="servers_update"),#catalog_serverupdate
+    path('servers/delete/<int:pk>', ServerDeleteView.as_view(),name="servers_delete"),#serverdelete
+    path('servers/database/',DataBaseListView.as_view(),name='servers_databases'),#catalog_databaseslist
+    path('databases/',DataBaseListView.as_view(),name='tracking'),#tracking_databaseslist
 
-    path('databases/<int:pk>',TablesListView.as_view(),name='tableslist'),
+    path('databases/<int:pk>',TablesListView.as_view(),name='servers_databases_details'),#tableslist
 
 
 ]

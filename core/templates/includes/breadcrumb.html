@@ -2,8 +2,13 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         {% for key, value in breadcrumb.items %} 
-        <li class="breadcrumb-item"><a href="#">{{ value |upper}}</a>{{ key }}</li>
+        <li class="breadcrumb-item"  {% ifequal key  '#' %}  aria-current="page"  {% endifequal  %} >
+          {% ifnotequal  key  '#' %} 
+            <a href="{% url key %}">
+          {% endifnotequal  %}
+          {{ value |upper}}</a></li>        
         {% endfor %}
+
       </ol>
     </nav>
 </div>

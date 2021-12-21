@@ -13,7 +13,7 @@ urlpatterns = [
 
     # The home page
 
-    path('tables/detail/<int:pk>', TablesDetailView.as_view(),name='tabledetail'),
+    path('tables/detail/<int:pk>', TablesDetailView.as_view(),name='servers_databases_tables_detail'), #tabledetail
 
 
 

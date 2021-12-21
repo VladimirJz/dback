@@ -38,7 +38,7 @@
           </li>
           <!-- sub Menu -->
           <li {% if menu == "servers" %}class="active"{% endif%}>       
-            <a href="/servers/">
+            <a href="{% url 'servers'%}">
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="reader-outline"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Servers</span>
@@ -47,7 +47,7 @@
           </li>
           <!-- sub Menu -->
           <li {% if menu == "databases" %}class="active"{% endif%}>       
-            <a href="{%url 'catalog_databaseslist' %}">
+            <a href="{%url 'servers_databases' %}">
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="server-outline"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Databases</span>
@@ -70,7 +70,7 @@
       <ul class="yoo-sidebar-nav-dropdown">
         <!-- sub Menu-->  
         <li >
-          <a href="{%url 'tracking_databaseslist' %}">
+          <a href="{%url 'tracking' %}">
             <span class="yoo-sidebar-link-title">
               <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="documents-outline"></ion-icon></span>
               <span class="yoo-sidebar-link-text">Tables</span>
