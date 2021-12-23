@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'core',
     'app',  # Enable the inner app ,
     'app.catalog',
-    'app.tracking'
+    'app.tracking',
+    'app.deploy'
 ]
 
 MIDDLEWARE = [
@@ -84,7 +85,7 @@ DATABASES = {
         "PASSWORD": "#1Qazse4",
         "HOST": "172.16.20.3",
         "PORT": "1433",
-        "OPTIONS": {"driver": "SQL Server Native Client 11.0", 
+        "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server",  #SQL Server Native Client 11.0
         },
     },
 }

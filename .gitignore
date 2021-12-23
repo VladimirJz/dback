@@ -1,0 +1,6 @@
+*.pyc
+*pyc
+*__pycache__
+dev/*
+/app/catalog/__pycache__/*
+app/catalog/migrations/__pycache__/*.pyc
