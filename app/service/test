@@ -1,0 +1,190 @@
+
+db=repository()
+remote=repository()
+sql='select SCRIPTID,SCRIPT from DLL_SCRIPTS'
+create_tables=db.get_list('IEEPO',sql)
+
+# for table in tables:
+#         print(table)
+target_db='DESARROLLO'
+print('CREANDO OBJETOS DE BASE DE DATOS')
+print('>>Tablas')
+for script in create_tables:
+    for key,value in script.items():
+        if key=='SCRIPT':
+            print(value)
+            if(value):
+                #if(remote.execute('DESARROLLO',value)):
+                    print('Ok')
+                    # insertar en la bitacora
+
+#Filter data by custom filters
+sql="select FILTERID,t.id,[schema],[name] ,COLUMNID,TYPEFILTER,LOWERVALUE,UPPERVALUE,VALUESDATATYPE,STEPBY from DLL_TABLEFILTERS f inner join catalog_tables t on f.TABLEID=t.id where coalesce(COLUMNID,'')!=''"
+tables_filters=db.get_resulset('IEEPO',sql)
+for filter in tables_filters:
+
+    # id=filter.get('FILTERID')
+    # table=filter.get('name')
+    # schema=filter.get('schema')
+    # type_filter=filter.get('TYPEFILTER')
+    # lower_value=filter.get('LOWERVALUE')
+    # upper_value=filter.get('UPPERVALUE')
+    # data_type=filter.get('VALUESDATATYPE')
+    # stepby=filter.get('STEPBY')
+    f = SimpleNamespace(**filter)
+    
+    print(f.name)
+    print(f.schema)
+
+    sentence_sql= 'INSERT INTO ' + target_db +'['+ f.schema +']'+ '['+f.name+']'
+
+        #for key,value in filter.items():
+        #print(key)
+
+
+
+
+
+
+class workspace():
+    def __init__(self):
+          self._server =''
+          self._target=''
+          self._source=''
+
+ #get-set       
+    @property
+    def server(self):
+         return self._server 
+
+    @server.setter
+    def server(self,value):
+        self._server = value
+        
+    @property
+    def target(self):
+         return self._target 
+
+    @target.setter
+    def target(self,value):
+        self._target = value
+
+    @property
+    def source(self):
+         return self._source 
+
+    @source.setter
+    def source(self,value):
+        self._source = value
+    #Users
+    @property
+    def user(self):
+         return self._user
+    @property
+    def passw(self):
+         return self._passw      
+
+&&&&
+
+
+
+class dbhandler():
+    def __init__(self):
+        #server.database='dba'
+        #self._db=server
+        self._current_job=0
+
+    
+    def transferdata(self,target,source):
+        print (self._current_job)
+        sql=('select '
+            '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
+            '[StepBy],[Table_id]'
+            'from deploy_tablefilters tf '
+            'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id'
+            'where tfj.jobs_id=?')
+        params=self._current_job
+        self.get_resulset(sql,params)
+    
+    def ofuscate(self):
+        pass
+    
+
+
+    def stringconection(self,workspace):
+        driver="Driver={'SQL Server Native Client 11.0}"
+        server="Server="+ workspace.server 
+        user="UID=" + workspace.user
+        user="PWD=" + workspace.passw
+
+
+        return workspace.target
+        
+
+    def open(self,server):
+        if server=='IEEPO':
+            db_constring=("Driver={SQL Server Native Client 11.0};"
+                        "Server=172.16.20.3;"
+                        "Database=dba;"
+                        "UID=sa;"
+                        "PWD=#1Qazse4;")
+        else: 
+            db_constring=("Driver={SQL Server Native Client 11.0};"
+                        "Server=172.16.20.3;"
+                        "Database=DESARROLLO;"
+                        "UID=sa;"
+                        "PWD=#1Qazse4;")
+        db_connection=pyodbc.connect(db_constring)         
+        return db_connection
+
+
+    def get_resulset(self,connection,sql):
+        '''return a list of dic's'''
+        # db=self.open(server)
+        db=connection
+        cursor=db.cursor()
+        cursor.execute(sql)
+        records=cursor.fetchall
+        dataset = []
+        column_names = [column[0] for column in cursor.description ]
+        #print(records)
+        #print(column_names)
+        for row in cursor:
+            #print(row.SCRIPT)
+            dataset.append(dict(zip(column_names,row)))
+        # for record in records:
+        #     insertObject.append( dict( zip( column_names , record ) ) )
+        cursor.close()
+        return dataset
+
+
+
+
+
+
+
+
+    def executer(self,server,sql):
+        db=self.open(server)
+        cursor=db.cursor()
+        if(cursor.execute(sql)):
+            success=True
+        else:
+            success=False
+        cursor.commit()
+        cursor.close()
+        return success
+
+    def get_table_columns(self,server,database,table):
+        i=self.info()
+        db=self.open(server)
+        cursor=db.cursor()
+
+#         Var_SQL="EXEC BACKUPUPDATE ?,?,?,?,?,?,?,?"
+#         cursor= db_conexion.cursor()
+#         params=(i.column_names)
+#         if(cursor.execute(Var_SQL,params)):
+#         x=1
+#         return x
+# class info():
+#     column_names="SELECT STRING_AGG(concat('[',COLUMN_NAME,']'),',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME =?  and TABLE_CATALOG=?"

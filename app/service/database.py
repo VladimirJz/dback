@@ -2,53 +2,16 @@
 #from pynotifier import Notification
 from sys import setrecursionlimit
 import pyodbc
+import random
 
-class workspace():
-    def __init__(self):
-          self._server =''
-          self._target=''
-          self._source=''
-
- #get-set       
-    @property
-    def server(self):
-         return self._server 
-
-    @server.setter
-    def server(self,value):
-        self._server = value
-        
-    @property
-    def target(self):
-         return self._target 
-
-    @target.setter
-    def target(self,value):
-        self._target = value
-
-    @property
-    def source(self):
-         return self._source 
-
-    @source.setter
-    def source(self,value):
-        self._source = value
-    #Users
-    @property
-    def user(self):
-         return self._user
-    @property
-    def passw(self):
-         return self._passw      
-
-
-class stringconnection():
-    def __init__(self):
-        self._driver =''
-        self._server=''
-        self._user=''
-        self._passw=''
-        self._database=''
+class connection():
+    def __init__(self,server,user,passw):
+        '''Server:IP or hostname | user: User | passws: password'''
+        self._driver ="ODBC Driver 17 for SQL Server" #add logic for OS driver
+        self._server=server
+        self._user=user
+        self._passw=passw
+        #self._database=''
 
        #Users
     @property
@@ -57,7 +20,7 @@ class stringconnection():
     
     @driver.setter
     def driver(self,value):
-        self._driver = "{SQL Server Native Client 11.0}"
+        self._driver = "ODBC Driver 17 for SQL Server"
 
     @property
     def server(self):
@@ -96,45 +59,162 @@ class stringconnection():
                 "Database="+ self._database + ";"
                 "UID=" + self.user + ";"
                 "PWD="+ self._passw +";")
+        print(db_constring)
         return db_constring
-
-class repository():
-
-
-
-
-        
-
-    def stringconection(self,workspace):
-        driver="Driver={'SQL Server Native Client 11.0}"
-        server="Server="+ workspace.server 
-        user="UID=" + workspace.user
-        user="PWD=" + workspace.passw
-
-
-        return workspace.target
-        
-
-    def open(self,server):
-        if server=='IEEPO':
-            db_constring=("Driver={SQL Server Native Client 11.0};"
-                        "Server=172.16.20.3;"
-                        "Database=dba;"
-                        "UID=sa;"
-                        "PWD=#1Qazse4;")
-        else: 
-            db_constring=("Driver={SQL Server Native Client 11.0};"
-                        "Server=172.16.20.3;"
-                        "Database=DESARROLLO;"
-                        "UID=sa;"
-                        "PWD=#1Qazse4;")
-        db_connection=pyodbc.connect(db_constring)         
+    
+    def get_connection(self):
+        db_strcon= self.get_stringconnection()
+        db_connection=pyodbc.connect(db_strcon)  
+        print('Success Connection to ' + self._database )       
         return db_connection
 
 
-    def get_resulset(self,server,sql):
+class admin_connection(connection):
+    def __init__(self,server,user,passw,job_id):
+        self._current_job = job_id
+        self._database='dba'
+        super().__init__(server,user,passw)
+    
+    @property
+    def current_job(self):
+        return self._current_job   
+
+
+
+
+
+
+class transfer_job():
+    def __init__(self,repo,source,target):
+        print('initialize')
+        self._job   =repo.current_job
+        self._repo  =repo.get_connection() # repo es una connexión
+        self._target=source.get_connection() # cambiar a targets
+
+    def generate_data_scripts(self):
+        print('Tables whit filters:')
+        sql=('select [Name],[Schema],'
+            '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
+            '[StepBy],[Table_id] '
+            'from catalog_tables ct inner join (deploy_tablefilters tf '
+            'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
+            'on ct.id=tf.Table_id '
+            'where tfj.jobs_id=1')
+
+        db=dbhandler(self._repo)
+        #con=self.repo.get_connection()
+        #print(con)
+        filtered_tables=db.get_resulset(self._repo,sql)
+        print(filtered_tables)
+
+
+    def ofuscate_scripts(self):
+        print('Ofuscate tables')
+        sql=('select [Name],[Schema],'
+            '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
+            '[StepBy],[Table_id] '
+            'from catalog_tables ct inner join (deploy_tablefilters tf '
+            'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
+            'on ct.id=tf.Table_id '
+            'where tfj.jobs_id=1')
+        # obtener parametros
+        
+        schema='dbo'
+        field='Nombre'
+        table='Empleados'
+        field_id='Id_emp'
+        sample=40
+        target=dbhandler(self._target)
+        repo=dbhandler(self._repo,self._job)
+        rows=target.row_count(table)
+        portion=rows//sample
+        print(''+ str(rows))
+        random_names=target.get_random(sample,field,table)
+        #print(random_names)
+        jump=0
+        first=0
+        block=0
+        scripts=[]
+        for i, name in enumerate(random_names):
+            block+=portion
+
+            jump = random.randint(portion,block)
+            first=block-random.randint(jump,block)
+            first=block
+            last=random.randint(first,block)+jump
+            if i==0 :
+                first=0
+
+            # ADD: for_update()
+            sql="UPDATE " + table  + " set " + field  + "= '"+ name +"' WHERE " + field_id + ">=" + str(first) + " AND " + field_id + "<=" + str(last) + ";"
+            scripts.append(sql)
+        print (scripts)
+        repo.add(scripts)
+
+            
+
+
+
+
+
+
+class dbhandler():
+  
+    
+    def __init__(self,connection,current_job=None):
+        self._current_job=current_job
+        self._connection=connection
+        pass
+
+
+    def read_field(self,sql):
+        #self._connection.execute
+        value = self._connection.execute(sql).fetchval()
+        return value
+    
+    def get_list(self,sql):
+        #list=self._connection.execute(sql).fetchall()
+        list = [item[0] for item in self._connection.execute(sql).fetchall()]
+
+        return list
+        #self._connection
+
+        #     cursor=db.cursor()
+        # cursor.execute(sql)
+        # records=cursor.fetchall
+
+    def add(self,scripts):
+        sql="select coalesce(max([Order]),0)Last from deploy_jobscripts where Job_id=" + str(self._current_job)
+        last_step=self.read_field(sql)
+        count=len(scripts)
+        order_list=[]
+        for i in range(last_step, last_step+count):
+            order_list.append(i)
+        print(order_list)
+
+        pass
+
+    def row_count(self,table):
+        sql='SELECT COUNT(*) FROM ' + table
+        rows=self.read_field(sql)
+        return  rows
+
+    def get_random(self,rows,field,table):
+        sql='SELECT TOP ' + str(rows)  + ' ' + field + ' FROM ' + table + ' ORDER BY  NEWID()'
+        list= self.get_list(sql)
+        return list
+     
+
+
+
+
+
+
+
+    def get_resulset(self,connection,sql):
         '''return a list of dic's'''
-        db=self.open(server)
+        # db=self.open(server)
+        db=connection
         cursor=db.cursor()
         cursor.execute(sql)
         records=cursor.fetchall
@@ -150,7 +230,14 @@ class repository():
         cursor.close()
         return dataset
 
-    def execute(self,server,sql):
+
+
+
+
+
+
+
+    def executer(self,server,sql):
         db=self.open(server)
         cursor=db.cursor()
         if(cursor.execute(sql)):
@@ -166,11 +253,6 @@ class repository():
         db=self.open(server)
         cursor=db.cursor()
 
-#         Var_SQL="EXEC BACKUPUPDATE ?,?,?,?,?,?,?,?"
-#         cursor= db_conexion.cursor()
-#         params=(i.column_names)
-#         if(cursor.execute(Var_SQL,params)):
-#         x=1
-#         return x
-# class info():
-#     column_names="SELECT STRING_AGG(concat('[',COLUMN_NAME,']'),',') FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME =?  and TABLE_CATALOG=?"
+class util():
+    def list(self):
+        pass

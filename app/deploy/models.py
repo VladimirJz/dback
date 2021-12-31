@@ -1,10 +1,11 @@
+from typing import TextIO
 from django.db import models
 
 # Create your models here.
 from datetime import date
 from django.contrib.auth.models import User
 from django.db.models.base import Model
-from django.db.models.fields import CharField, DateField, DecimalField, IntegerField, SmallIntegerField
+from django.db.models.fields import CharField, DateField, DecimalField, IntegerField, SmallIntegerField, TextField
 from django.db.models.fields.related import ForeignKey
 from app.catalog.models import DataBases, Tables
 
@@ -27,7 +28,7 @@ class TableFilters(models.Model):
     Job=models.ManyToManyField(Jobs)
     Table=ForeignKey(Tables,on_delete=models.SET_NULL,null=True)
     Column=CharField(max_length=50,help_text='Column Name')
-    FILTERS_TYPES=[(0,'Dont Filter')(1,'Equal to'),(2,'Between'),(3,'Iterate Between')];
+    FILTERS_TYPES=[(0,'Dont Filter'),(1,'Equal to'),(2,'Between'),(3,'Iterate Between')];
     FilterType=models.SmallIntegerField(choices=FILTERS_TYPES, default=1,help_text='Filter by')
     LowerValue=CharField(max_length=10,help_text='Lower limit')
     UpperValue=CharField(max_length=10,help_text='Upper limit')
@@ -45,6 +46,7 @@ class JobScripts(models.Model):
     SCRIPT_TYPES=[(1,'DDL'),(2,'DML'),(3,'Other')]
     Type=models.SmallIntegerField(choices=SCRIPT_TYPES,help_text='Type of script')
     Order=IntegerField(help_text='Order of exec')
+    Script=TextField(help_text='Sentence SQL to execute',null=True)
 
 
 
