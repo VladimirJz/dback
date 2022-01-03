@@ -90,7 +90,18 @@ class transfer_job():
         self._job   =repo.current_job
         self._repo  =repo.get_connection() # repo es una connexión
         self._target=source.get_connection() # cambiar a targets
+        self._source=source.get_connection()
 
+    
+    def enable_insert_identity(self,table,value):
+        sql="SET IDENTITY_INSERT [" +  table  + "]" 
+        if(value==True):
+            sql+=" ON"
+        else:
+            sql+=" OFF"
+
+        return sql
+    
     def generate_data_scripts(self):
         print('Tables whit filters:')
         sql=('select [Name],[Schema],'
@@ -100,13 +111,30 @@ class transfer_job():
             'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
             'on ct.id=tf.Table_id '
             'where tfj.jobs_id=1')
+    
 
-        db=dbhandler(self._repo)
+        repo=dbhandler(self._repo)
+        source=dbhandler(self._source)
         #con=self.repo.get_connection()
         #print(con)
-        filtered_tables=db.get_resulset(self._repo,sql)
-        print(filtered_tables)
+        filtered_tables=repo.get_resulset(self._repo,sql)
+        for filter in filtered_tables:
+            scripts=[]
+            table=filter.get('Name')
+            object_id=repo.object_id(table)
+            print(object_id)
+            if(source.has_identity(object_id)):
+                enable_insert_id=self.enable_insert_identity(table,True)
+                scripts.append(enable_insert_id)
+                column_names=source.get_columnnames(table)
+                insert_into="INSERT INTO " + table
 
+                #print(enable_insert_id)
+                #print (column_names)
+                
+                pass
+        
+        
 
     def ofuscate_scripts(self):
         print('Ofuscate tables')
@@ -117,6 +145,8 @@ class transfer_job():
             'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
             'on ct.id=tf.Table_id '
             'where tfj.jobs_id=1')
+        dml=2
+        script_type=dml
         # obtener parametros
         
         schema='dbo'
@@ -149,7 +179,7 @@ class transfer_job():
             sql="UPDATE " + table  + " set " + field  + "= '"+ name +"' WHERE " + field_id + ">=" + str(first) + " AND " + field_id + "<=" + str(last) + ";"
             scripts.append(sql)
         print (scripts)
-        repo.add(scripts)
+        repo.add(scripts,script_type)
 
             
 
@@ -164,12 +194,54 @@ class dbhandler():
     def __init__(self,connection,current_job=None):
         self._current_job=current_job
         self._connection=connection
+        self._database=self.database_name()
         pass
 
+    def object_id(self,table):
+        sql="select ObjectID from catalog_tables where Name=?"
+        print (sql,table)
+        object_id=self.read_field(sql,table)
+        return object_id
 
-    def read_field(self,sql):
+    def has_identity(self,object_id):
+        #object_id=self.object_id(table)
+        sql="select (OBJECTPROPERTY("+ str(object_id) + ", 'TableHasIdentity'))"
+        print (sql)
+        if(self.read_field(sql)==1):
+            return True
+        else:
+            return False
+        pass
+
+    def database_name(self):
+        database_name=self._connection.getinfo(pyodbc.SQL_DATABASE_NAME)
+        return database_name
+        pass
+
+    def get_columnnames(self,table):        
+        database= (self.database_name())
+        parameters=[]
+        sql="SELECT STRING_AGG(concat('[',COLUMN_NAME,']'),',')  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? and TABLE_CATALOG=?"
+        print (sql)
+        parameters.append(table)
+        parameters.append(database)
+        column_names=self.read_field(sql,parameters)
+        return column_names
+        pass
+ 
+
+    # def read_field(self,sql):
+    #     #self._connection.execute
+    #     value = self._connection.execute(sql).fetchval()
+    #     return value
+
+    def read_field(self,sql,parameters=None):
         #self._connection.execute
-        value = self._connection.execute(sql).fetchval()
+        if(parameters==None):
+            value = self._connection.execute(sql).fetchval()
+        else:
+            value= self._connection.execute(sql,parameters).fetchval()
+        
         return value
     
     def get_list(self,sql):
@@ -182,15 +254,31 @@ class dbhandler():
         #     cursor=db.cursor()
         # cursor.execute(sql)
         # records=cursor.fetchall
-
-    def add(self,scripts):
+    def get_order(self):
         sql="select coalesce(max([Order]),0)Last from deploy_jobscripts where Job_id=" + str(self._current_job)
-        last_step=self.read_field(sql)
+        last_script=self.read_field(sql)
+        order=last_script+1
+        return order
+
+    def add(self,scripts,script_type):
+        order=self.get_order()
         count=len(scripts)
         order_list=[]
-        for i in range(last_step, last_step+count):
+        job_id=[]
+        type=[]
+        for i in range(order, order+count):
             order_list.append(i)
+            job_id.append(self._current_job)
+            type.append(script_type)
         print(order_list)
+        cursor=self._connection.cursor()
+
+        values=list(zip(type,order_list,job_id,scripts))
+        sql='INSERT INTO deploy_jobscripts ([Type],[Order],[Job_id],[Script]) values (?,?,?,? )'
+        print(values)
+        cursor.executemany(sql,values)
+        self._connection.commit()
+        
 
         pass
 
