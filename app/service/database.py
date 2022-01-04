@@ -103,6 +103,7 @@ class transfer_job():
             sql+=" OFF"
 
         return sql
+
     def truncate(self,table):
         sql="TRUNCATE TABLE [" + table + "];"
         return sql
@@ -129,6 +130,7 @@ class transfer_job():
         for filter in filtered_tables:
             scripts=[]
             table=filter.get('Name')
+            schema=filter.get('Schema')
             object_id=filter.get('ObjectID')
             FilterType=filter.get('FilterType')
             Column=filter.get('Column')
@@ -145,7 +147,7 @@ class transfer_job():
                 scripts.append(enable_insert_id)
                 
             column_names=source.get_columnnames(object_id)
-            insert_into="INSERT INTO " +  source.full_table_name(table)  + " (" + column_names + ")"
+            insert_into="INSERT INTO [" +schema + "].["+ table +"] (" + column_names + ")"
             from_table =" select " +  column_names  + " from " + source.full_table_name(table) + ""
             #print(FilterType,DataType)
             # begin=int(Lower)
