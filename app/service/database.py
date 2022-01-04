@@ -103,10 +103,13 @@ class transfer_job():
             sql+=" OFF"
 
         return sql
+    def truncate(self,table):
+        sql="TRUNCATE TABLE [" + table + "];"
+        return sql
     
     def generate_data_scripts(self):
         print('Tables whit filters:')
-        sql=('select [Name],[Schema],'
+        sql=('select [ObjectID],[Name],[Schema],'
             '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
             '[StepBy],[Table_id] '
             'from catalog_tables ct inner join (deploy_tablefilters tf '
@@ -126,19 +129,23 @@ class transfer_job():
         for filter in filtered_tables:
             scripts=[]
             table=filter.get('Name')
+            object_id=filter.get('ObjectID')
             FilterType=filter.get('FilterType')
             Column=filter.get('Column')
             Lower=filter.get('LowerValue')
             Upper=filter.get('UpperValue')
             DataType=filter.get('ValuesDataType')
             StepBy=filter.get('StepBy')
-            object_id=repo.object_id(table)
+            #object_id=repo.object_id(table)
             print("TABLE :" + table)
+            truncate_script=self.truncate(table)
+            scripts.append(truncate_script)
             if(source.has_identity(object_id)):
                 enable_insert_id=self.enable_insert_identity(table,True)
                 scripts.append(enable_insert_id)
-            column_names=source.get_columnnames(table)
-            insert_into="INSERT INTO " +  table  + " (" + column_names + ")"
+                
+            column_names=source.get_columnnames(object_id)
+            insert_into="INSERT INTO " +  source.full_table_name(table)  + " (" + column_names + ")"
             from_table =" select " +  column_names  + " from " + source.full_table_name(table) + ""
             #print(FilterType,DataType)
             # begin=int(Lower)
@@ -314,13 +321,13 @@ class dbhandler():
         return database_name
         pass
 
-    def get_columnnames(self,table):        
+    def get_columnnames(self,object_id):        
         database= (self.database_name())
         parameters=[]
-        sql="SELECT STRING_AGG(concat('[',COLUMN_NAME,']'),',')  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? and TABLE_CATALOG=?"
+        #sql="SELECT STRING_AGG(concat('[',COLUMN_NAME,']'),',')  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? and TABLE_CATALOG=?"
+        sql="SELECT STRING_AGG(concat('[',name,']'),',')  FROM sys.columns WHERE object_id=?"
         print (sql)
-        parameters.append(table)
-        parameters.append(database)
+        parameters.append(object_id)
         column_names=self.read_field(sql,parameters)
         return column_names
         pass
