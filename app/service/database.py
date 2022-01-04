@@ -3,6 +3,8 @@
 from sys import setrecursionlimit
 import pyodbc
 import random
+#from datetime import timedelta, date,datetime
+from datetime import datetime, timedelta
 
 class connection():
     def __init__(self,server,user,passw):
@@ -89,7 +91,7 @@ class transfer_job():
         print('initialize')
         self._job   =repo.current_job
         self._repo  =repo.get_connection() # repo es una connexión
-        self._target=source.get_connection() # cambiar a targets
+        self._target=target.get_connection() # cambiar a targets
         self._source=source.get_connection()
 
     
@@ -110,29 +112,88 @@ class transfer_job():
             'from catalog_tables ct inner join (deploy_tablefilters tf '
             'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
             'on ct.id=tf.Table_id '
-            'where tfj.jobs_id=1')
-    
+            'where ct.Status=1 '
+            'and tfj.jobs_id=1')
+        dml=2
+        script_type=dml
 
-        repo=dbhandler(self._repo)
+        repo=dbhandler(self._repo,self._job)
         source=dbhandler(self._source)
+    
         #con=self.repo.get_connection()
         #print(con)
         filtered_tables=repo.get_resulset(self._repo,sql)
         for filter in filtered_tables:
             scripts=[]
             table=filter.get('Name')
+            FilterType=filter.get('FilterType')
+            Column=filter.get('Column')
+            Lower=filter.get('LowerValue')
+            Upper=filter.get('UpperValue')
+            DataType=filter.get('ValuesDataType')
+            StepBy=filter.get('StepBy')
             object_id=repo.object_id(table)
-            print(object_id)
+            print("TABLE :" + table)
             if(source.has_identity(object_id)):
                 enable_insert_id=self.enable_insert_identity(table,True)
                 scripts.append(enable_insert_id)
-                column_names=source.get_columnnames(table)
-                insert_into="INSERT INTO " + table
+            column_names=source.get_columnnames(table)
+            insert_into="INSERT INTO " +  table  + " (" + column_names + ")"
+            from_table =" select " +  column_names  + " from " + source.full_table_name(table) + ""
+            #print(FilterType,DataType)
+            # begin=int(Lower)
 
+            if(FilterType==3): # iterate
+                # id stepby =1 then use ==
+                if (DataType==3): #date
+                    #begin=date(Lower)
+                    begin=datetime.strptime(Lower,"%Y-%m-%d")
+                    lastest=datetime.strptime(Upper,"%Y-%m-%d")
+                    #print(type(begin))
+                    #print(begin,lastest)
+                    while begin <=lastest:
+                        end=begin + timedelta(days=StepBy) 
+                        if(end>lastest):
+                            end=lastest
+                        where=" where " + Column + ">=" + begin.strftime("'%Y-%m-%d'")+ " and " + Column + "<=" + end.strftime("'%Y-%m-%d'") + ";"
+                        begin=end + timedelta(days=1)
+                        sql=insert_into + from_table + where
+                        scripts.append(sql)
+                if(DataType==1):#int
+                    begin=int(Lower)
+                    lastest=int(Upper)
+                    #print(begin,lastest)
+                    while begin<=lastest:
+                        end=begin+StepBy
+                        if(end>lastest):
+                            end=lastest
+                        if(StepBy==1):
+                            where=" where " + Column + "=" + str(begin) + ";"
+                            begin+=StepBy
+                        else:
+                            where=" where " + Column + ">=" + str(begin) + " and " + Column + "<=" + str(end) + ";"
+                            begin=end + 1
+                        sql=insert_into + from_table + where
+                        scripts.append(sql)
+                        #print(sql)
+
+            if(FilterType==0):#No Filter
+                sql=insert_into + from_table
+                scripts.append(sql)
+
+            if(source.has_identity(object_id)):
+                disable_insert_id=self.enable_insert_identity(table,False)
+                scripts.append(disable_insert_id)   
+            print(scripts)
+            if(scripts):
+                repo.add(scripts,script_type)
+
+
+                
                 #print(enable_insert_id)
                 #print (column_names)
                 
-                pass
+            pass
         
         
 
@@ -178,8 +239,9 @@ class transfer_job():
             # ADD: for_update()
             sql="UPDATE " + table  + " set " + field  + "= '"+ name +"' WHERE " + field_id + ">=" + str(first) + " AND " + field_id + "<=" + str(last) + ";"
             scripts.append(sql)
-        print (scripts)
-        repo.add(scripts,script_type)
+        #print (scripts)
+        if(scripts):
+            repo.add(scripts,script_type)
 
             
 
@@ -195,7 +257,21 @@ class dbhandler():
         self._current_job=current_job
         self._connection=connection
         self._database=self.database_name()
+
         pass
+    def full_table_name(self,table):
+        database_name=self._database
+        schema_name=self.schema_name(table)
+        print(database_name  + table)
+        full_name="[" + database_name + "]." + "[" + schema_name + "]." + "[" + table  + "]"
+        return full_name
+
+    def schema_name(self,table):
+        sql="select schema_name(schema_id) ,object_id from sys.objects where name=?" # change for ObjectID
+        #object_id=self.object_id(table)
+        parameters=table
+        schema_name=self.read_field(sql,parameters)
+        return schema_name
 
     def object_id(self,table):
         sql="select ObjectID from catalog_tables where Name=?"
@@ -255,9 +331,12 @@ class dbhandler():
         # cursor.execute(sql)
         # records=cursor.fetchall
     def get_order(self):
-        sql="select coalesce(max([Order]),0)Last from deploy_jobscripts where Job_id=" + str(self._current_job)
-        last_script=self.read_field(sql)
+        sql="select coalesce(max([Order]),0)Last from deploy_jobscripts where Job_id=?"
+        parameters= (self._current_job)
+        print (sql,self._current_job)
+        last_script=self.read_field(sql,parameters)
         order=last_script+1
+        print('order')
         return order
 
     def add(self,scripts,script_type):
