@@ -159,6 +159,7 @@ class transfer_job():
                         begin=end + timedelta(days=1)
                         sql=insert_into + from_table + where
                         scripts.append(sql)
+
                 if(DataType==1):#int
                     begin=int(Lower)
                     lastest=int(Upper)
@@ -192,9 +193,28 @@ class transfer_job():
                 
                 #print(enable_insert_id)
                 #print (column_names)
+            
                 
-            pass
+        print('done')
+    def deploy_database(self):
+        print('Deploy Start...')
+        print('Running Scripts')
+        target=dbhandler(self._target)
+        repo=dbhandler(self._repo,self._job)
+        sql=("select [Order],[Type] ,Script from deploy_jobscripts where Job_id=1"
+            "order by [Order] asc")
+        deploy_scripts=repo.read_rows(sql)
+        for script in deploy_scripts:
+            sql_script=script.get('Script')
+            print(sql_script)
+            if(target.run(sql_script)):
+                print('done..')
+            else:
+                print('===Error ! ==')
+
+
         
+
         
 
     def ofuscate_scripts(self):
@@ -310,6 +330,15 @@ class dbhandler():
     #     #self._connection.execute
     #     value = self._connection.execute(sql).fetchval()
     #     return value
+    def run(self,sql):
+        success=self._connection.execute(sql)
+        if(success):
+            return True
+        else:
+            return False
+
+
+        
 
     def read_field(self,sql,parameters=None):
         #self._connection.execute
@@ -396,6 +425,22 @@ class dbhandler():
         #     insertObject.append( dict( zip( column_names , record ) ) )
         cursor.close()
         return dataset
+
+    def read_rows(self,sql):
+
+        
+        cursor=self._connection.cursor()
+        cursor.execute(sql)
+        records=cursor.fetchall
+        dataset = []
+        column_names = [column[0] for column in cursor.description ]
+
+        for row in cursor:
+            dataset.append(dict(zip(column_names,row)))
+
+        cursor.close()
+        return dataset
+ 
 
 
 

@@ -16,9 +16,9 @@ repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
 
 #repo.get_connection()
 syncdb=transfer_job(repo,source,target)
-syncdb.generate_data_scripts()
+#syncdb.generate_data_scripts()
 #syncdb.ofuscate_scripts()
-
+syncdb.deploy_database()
 #repo.get_connection()
 
 
