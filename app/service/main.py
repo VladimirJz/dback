@@ -9,14 +9,16 @@ source=connection('172.16.20.3','sa','#1Qazse4')
 source.database='IEEPO'
 
 target=connection('172.16.20.3','sa','#1Qazse4')
-target.database='DESARROLLO'
+target.database='TEST1'
 
 repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
 
 
 #repo.get_connection()
 syncdb=transfer_job(repo,source,target)
-syncdb.generate_data_scripts()
+syncdb.initialize()
+syncdb.create_target_database()
+#syncdb.generate_data_scripts()
 syncdb.deploy_database()
 #syncdb.ofuscate_scripts()
 #repo.get_connection()
