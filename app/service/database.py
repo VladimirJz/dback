@@ -108,9 +108,11 @@ class transfer_job():
         source=dbhandler(self._source)
         target=dbhandler(self._target)
         table=source.full_table_name(object_id,target._database)
-        print("clean:"+table)
-        sql="TRUNCATE TABLE " + table + ";"
-
+        #print("clean:"+table)
+        if(table):
+            sql="TRUNCATE TABLE " + table + ";"
+        else:
+            sql=None
         return sql
     def initialize(self):
         sql='delete  from deploy_jobscripts where Job_id=?'
@@ -166,9 +168,9 @@ class transfer_job():
         DML=2
 
         repo=dbhandler(self._repo,self._job)
-        #schemas_script=self.create_schemas()
-        #scripts.append(schemas_script)
-        #scripts_types.append(DDL)
+        schemas_script=self.create_schemas()
+        scripts.append(schemas_script)
+        scripts_types.append(DDL)
 
         # iterate
         sql=('select ct.[id],[ObjectID],[Name],[Schema],[Table_id] '
@@ -183,12 +185,18 @@ class transfer_job():
         #print('reda')
         filtered_tables=repo.read_rows(sql)
         for table in filtered_tables:
+               
             object_id=table.get('ObjectID')
+            name=table.get('Name')
+            print("== Working whit TABLE :" + name)
             #print(object_id)
             create_script=self.create_table(object_id)
-            scripts.append(create_script)
-            scripts_types.append(DML)
-            pass
+            if(create_script):
+                scripts.append(create_script)
+                scripts_types.append(DML)
+            else:
+                print('Table dont exists anymore')
+                #pass
         pass
         #print(scripts)
         repo.add(scripts,scripts_types)
@@ -233,71 +241,73 @@ class transfer_job():
             #object_id=repo.object_id(table)
             print("== Working whit TABLE :" + table)
             full_table_name=source.full_table_name(object_id,target._database)
-            constraints_script=self.disable_contraints(object_id)
-            if(constraints_script):
-                scripts.append(constraints_script)
-            truncate_script=self.clean_source(object_id)
-            #print (truncate_script)
-            scripts.append(truncate_script)
-            scripts_types.append(ddl)
-            if(source.has_identity(object_id)):
-                enable_insert_id=self.enable_insert_identity(full_table_name,True)
-                scripts.append(enable_insert_id)
-                scripts_types.append(ddl)
-                
-            column_names=source.get_columnnames(object_id)
-            insert_into="INSERT INTO [" +schema + "].["+ table +"] (" + column_names + ")"
-            from_table =" select " +  column_names  + " from " + source.full_table_name(object_id) + ""
-            #print(FilterType,DataType)
-            # begin=int(Lower)
+            if(full_table_name):
+                constraints_script=self.disable_contraints(object_id)
+                if(constraints_script):
+                    scripts.append(constraints_script)
+                truncate_script=self.clean_source(object_id)
+                #print (truncate_script)
+                if(truncate_script):
+                    scripts.append(truncate_script)
+                    scripts_types.append(ddl)
+                if(source.has_identity(object_id)):
+                    enable_insert_id=self.enable_insert_identity(full_table_name,True)
+                    scripts.append(enable_insert_id)
+                    scripts_types.append(ddl)
+                    
+                column_names=source.get_columnnames(object_id)
+                insert_into="INSERT INTO [" +schema + "].["+ table +"] (" + column_names + ")"
+                from_table =" select " +  column_names  + " from " + source.full_table_name(object_id) + ""
+                #print(FilterType,DataType)
+                # begin=int(Lower)
 
-            if(FilterType==3): # iterate
-                # id stepby =1 then use ==
-                if (DataType==3): #date
-                    #begin=date(Lower)
-                    begin=datetime.strptime(Lower,"%Y-%m-%d")
-                    lastest=datetime.strptime(Upper,"%Y-%m-%d")
-                    #print(type(begin))
-                    #print(begin,lastest)
-                    while begin <=lastest:
-                        end=begin + timedelta(days=StepBy) 
-                        if(end>lastest):
-                            end=lastest
-                        where=" where " + Column + ">=" + begin.strftime("'%Y-%m-%d'")+ " and " + Column + "<=" + end.strftime("'%Y-%m-%d'") + ";"
-                        begin=end + timedelta(days=1)
-                        sql=insert_into + from_table + where
-                        scripts.append(sql)
-                        scripts_types.append(dml)
+                if(FilterType==3): # iterate
+                    # id stepby =1 then use ==
+                    if (DataType==3): #date
+                        #begin=date(Lower)
+                        begin=datetime.strptime(Lower,"%Y-%m-%d")
+                        lastest=datetime.strptime(Upper,"%Y-%m-%d")
+                        #print(type(begin))
+                        #print(begin,lastest)
+                        while begin <=lastest:
+                            end=begin + timedelta(days=StepBy) 
+                            if(end>lastest):
+                                end=lastest
+                            where=" where " + Column + ">=" + begin.strftime("'%Y-%m-%d'")+ " and " + Column + "<=" + end.strftime("'%Y-%m-%d'") + ";"
+                            begin=end + timedelta(days=1)
+                            sql=insert_into + from_table + where
+                            scripts.append(sql)
+                            scripts_types.append(dml)
 
-                if(DataType==1):#int
-                    begin=int(Lower)
-                    lastest=int(Upper)
-                    #print(begin,lastest)
-                    while begin<=lastest:
-                        end=begin+StepBy
-                        if(end>lastest):
-                            end=lastest
-                        if(StepBy==1):
-                            where=" where " + Column + "=" + str(begin) + ";"
-                            begin+=StepBy
-                        else:
-                            where=" where " + Column + ">=" + str(begin) + " and " + Column + "<=" + str(end) + ";"
-                            begin=end + 1
-                        sql=insert_into + from_table + where
-                        scripts.append(sql)
-                        scripts_types.append(dml)
-                        #print(sql)
+                    if(DataType==1):#int
+                        begin=int(Lower)
+                        lastest=int(Upper)
+                        #print(begin,lastest)
+                        while begin<=lastest:
+                            end=begin+StepBy
+                            if(end>lastest):
+                                end=lastest
+                            if(StepBy==1):
+                                where=" where " + Column + "=" + str(begin) + ";"
+                                begin+=StepBy
+                            else:
+                                where=" where " + Column + ">=" + str(begin) + " and " + Column + "<=" + str(end) + ";"
+                                begin=end + 1
+                            sql=insert_into + from_table + where
+                            scripts.append(sql)
+                            scripts_types.append(dml)
+                            #print(sql)
 
-            if(FilterType==0):#No Filter
-                sql=insert_into + from_table
-                scripts.append(sql)
-                scripts_types.append(dml)
+                if(FilterType==0):#No Filter
+                    sql=insert_into + from_table
+                    scripts.append(sql)
+                    scripts_types.append(dml)
 
-            if(source.has_identity(object_id)):
-                disable_insert_id=self.enable_insert_identity(full_table_name,False)
-                scripts.append(disable_insert_id)   
-                scripts_types.append(ddl)
-            #print(scripts)
+                if(source.has_identity(object_id)):
+                    disable_insert_id=self.enable_insert_identity(full_table_name,False)
+                    scripts.append(disable_insert_id)   
+                    scripts_types.append(ddl)
+                #print(scripts)
             if(scripts):
                 repo.add(scripts,scripts_types)
 
@@ -319,8 +329,8 @@ class transfer_job():
         for script in deploy_scripts:
             sql_script=script.get('Script')
             script_type=script.get('Type')
-            print("stored script:"+ sql_script)
-            print("<--")
+            # print("stored script:"+ sql_script)
+            #print("<--")
             if(target.run(sql_script,type=script_type)):
                 print('done..')
             else:
@@ -401,87 +411,177 @@ class transfer_job():
         source=dbhandler(self._source)
         target=dbhandler(self._target)
         full_table_name=source.full_table_name(object_id,target._database)
-        sql=(" SELECT 'CREATE TABLE ' +  '" + full_table_name  + "' + CHAR(13) + '(' + CHAR(13) + STUFF((   "
-        "SELECT CHAR(13) + '    , [' + c.name + '] ' +    "
-        "CASE WHEN c.is_computed = 1  "
-        "THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)  "
-        "ELSE   "
-        "CASE WHEN c.system_type_id != c.user_type_id   "
-        "THEN '[' + SCHEMA_NAME(tp.[schema_id]) + '].[' + tp.name + ']'   "
-        "ELSE '[' + UPPER(tp.name) + ']'   "
-        "END  +   "
-        "CASE   "
-        "WHEN tp.name IN ('varchar', 'char', 'varbinary', 'binary')  "
-        "THEN '(' + CASE WHEN c.max_length = -1   "
-        "THEN 'MAX'   "
-        "ELSE CAST(c.max_length AS VARCHAR(5))   "
-        "END + ')'  "
-        "WHEN tp.name IN ('nvarchar', 'nchar')  "
-        "THEN '(' + CASE WHEN c.max_length = -1  " 
-        "THEN 'MAX'   "
-        "ELSE CAST(c.max_length / 2 AS VARCHAR(5))   "
-        "END + ')'  "
-        "WHEN tp.name IN ('datetime2', 'time2', 'datetimeoffset')   "
-        "THEN '(' + CAST(c.scale AS VARCHAR(5)) + ')'  "
-        "WHEN tp.name = 'decimal'  "
-        "THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'  "
-        "ELSE ''  "
-        "END +  "
-        "CASE WHEN c.collation_name IS NOT NULL AND c.system_type_id = c.user_type_id   "
-        "THEN ' COLLATE ' + c.collation_name  "
-        "ELSE ''  "
-        "END +  "
-        "CASE WHEN c.is_nullable = 1   "
-        "THEN ' NULL'  "
-        "ELSE ' NOT NULL'  "
-        "END +  "
-        "CASE WHEN c.default_object_id != 0   "
-        "THEN ' CONSTRAINT [' + OBJECT_NAME(c.default_object_id) + ']' +   "
-        "' DEFAULT ' + OBJECT_DEFINITION(c.default_object_id)  "
-        "ELSE ''  "
-        "END +   "
-        "CASE WHEN cc.[object_id] IS NOT NULL   "
-        "THEN ' CONSTRAINT [' + cc.name + '] CHECK ' + cc.[definition]  "
-        "ELSE ''  "
-        "END +  "
-        "CASE WHEN c.is_identity = 1   "
-        "THEN ' IDENTITY(' + CAST(IDENTITYPROPERTY(c.[object_id], 'SeedValue') AS VARCHAR(5)) + ',' +   "
-        "CAST(IDENTITYPROPERTY(c.[object_id], 'IncrementValue') AS VARCHAR(5)) + ')'   "
-        "ELSE ''   "
-        "END   "
-        "END  "
-        "FROM sys.columns c WITH(NOLOCK)  "
-        "JOIN sys.types tp WITH(NOLOCK) ON c.user_type_id = tp.user_type_id  "
-        "LEFT JOIN sys.check_constraints cc WITH(NOLOCK)   "
-        "ON c.[object_id] = cc.parent_object_id   "
-        "AND cc.parent_column_id = c.column_id  "
-        "WHERE c.[object_id] = " + str(object_id) + "  "
-        "ORDER BY c.column_id  "
-        "FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 7, '      ') +   "
-        "ISNULL((SELECT '  "
-        ", CONSTRAINT [' + i.name + '] PRIMARY KEY ' +   "
-        "CASE WHEN i.index_id = 1   "
-        "THEN 'CLUSTERED'   "
-        "ELSE 'NONCLUSTERED' "  
-        "END +' (' + (  "
-        "SELECT STUFF(CAST((  "
-        "SELECT ', [' + COL_NAME(ic.[object_id], ic.column_id) + ']' +  "
-        "CASE WHEN ic.is_descending_key = 1  "
-        "THEN ' DESC'  "
-        "ELSE ''  "
-        "END  "
-        "FROM sys.index_columns ic WITH(NOLOCK)  "
-        "WHERE i.[object_id] = ic.[object_id]  "
-        "AND i.index_id = ic.index_id  "
-        "FOR XML PATH(N''), TYPE) AS NVARCHAR(MAX)), 1, 2, '')) + '))'  "
-        "FROM sys.indexes i WITH(NOLOCK)  "
-        "WHERE i.[object_id] = "+ str(object_id) + " "
-        "AND i.is_primary_key = 1), '') + CHAR(13) + '' ;") #
-        #print(sql)
-        create_script=source.read_field(sql)
+        if(full_table_name):
+            sql=(" SELECT 'CREATE TABLE ' + '" + full_table_name  + "'+'(' + STUFF((   "
+            "SELECT + char(13) + '    , [' + c.name + '] ' +    "
+            "CASE WHEN c.is_computed = 1  "
+            "THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)  "
+            "ELSE   "
+            "CASE WHEN c.system_type_id != c.user_type_id   "
+            "THEN '[' + SCHEMA_NAME(tp.[schema_id]) + '].[' + tp.name + ']'   "
+            "ELSE '[' + UPPER(tp.name) + ']'   "
+            "END  +   "
+            "CASE   "
+            "WHEN tp.name IN ('varchar', 'char', 'varbinary', 'binary')  "
+            "THEN '(' + CASE WHEN c.max_length = -1   "
+            "THEN 'MAX'   "
+            "ELSE CAST(c.max_length AS VARCHAR(5))   "
+            "END + ')'  "
+            "WHEN tp.name IN ('nvarchar', 'nchar')  "
+            "THEN '(' + CASE WHEN c.max_length = -1  " 
+            "THEN 'MAX'   "
+            "ELSE CAST(c.max_length / 2 AS VARCHAR(5))   "
+            "END + ')'  "
+            "WHEN tp.name IN ('datetime2', 'time2', 'datetimeoffset')   "
+            "THEN '(' + CAST(c.scale AS VARCHAR(5)) + ')'  "
+            "WHEN tp.name = 'decimal'  "
+            "THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'  "
+            "ELSE ''  "
+            "END +  "
+            #"CASE WHEN c.collation_name IS NOT NULL AND c.system_type_id = c.user_type_id   "  # 'til find a len string solution (len max 6353)
+            "CASE WHEN 0=1 "
+            "THEN ' COLLATE ' + c.collation_name  "
+            "ELSE ''  "
+            "END +  "
+            "CASE WHEN c.is_nullable = 1   "
+            "THEN ' NULL'  "
+            "ELSE ' NOT NULL'  "
+            "END +  "
+            "CASE WHEN c.default_object_id != 0   "
+            "THEN ' CONSTRAINT [' + OBJECT_NAME(c.default_object_id) + ']' +   "
+            "' DEFAULT ' + OBJECT_DEFINITION(c.default_object_id)  "
+            "ELSE ''  "
+            "END +   "
+            "CASE WHEN cc.[object_id] IS NOT NULL   "
+            "THEN ' CONSTRAINT [' + cc.name + '] CHECK ' + cc.[definition]  "
+            "ELSE ''  "
+            "END +  "
+            "CASE WHEN c.is_identity = 1   "
+            "THEN ' IDENTITY(' + CAST(IDENTITYPROPERTY(c.[object_id], 'SeedValue') AS VARCHAR(5)) + ',' +   "
+            "CAST(IDENTITYPROPERTY(c.[object_id], 'IncrementValue') AS VARCHAR(5)) + ')'   "
+            "ELSE ''   "
+            "END   "
+            "END  "
+            "FROM sys.columns c WITH(NOLOCK)  "
+            "JOIN sys.types tp WITH(NOLOCK) ON c.user_type_id = tp.user_type_id  "
+            "LEFT JOIN sys.check_constraints cc WITH(NOLOCK)   "
+            "ON c.[object_id] = cc.parent_object_id   "
+            "AND cc.parent_column_id = c.column_id  "
+            "WHERE c.[object_id] = " + str(object_id) + "  "
+            "ORDER BY c.column_id  "
+            "FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 7, '      ') +   "
+            "ISNULL((SELECT '  "
+            ", CONSTRAINT [' + i.name + '] PRIMARY KEY ' +   "
+            "CASE WHEN i.index_id = 1   "
+            "THEN 'CLUSTERED'   "
+            "ELSE 'NONCLUSTERED' "  
+            "END +' (' + (  "
+            "SELECT STUFF(CAST((  "
+            "SELECT ', [' + COL_NAME(ic.[object_id], ic.column_id) + ']' +  "
+            "CASE WHEN ic.is_descending_key = 1  "
+            "THEN ' DESC'  "
+            "ELSE ''  "
+            "END  "
+            "FROM sys.index_columns ic WITH(NOLOCK)  "
+            "WHERE i.[object_id] = ic.[object_id]  "
+            "AND i.index_id = ic.index_id  "
+            "FOR XML PATH(N''), TYPE) AS NVARCHAR(MAX)), 1, 2, '')) + '))'  "
+            "FROM sys.indexes i WITH(NOLOCK)  "
+            "WHERE i.[object_id] = "+ str(object_id) + " "
+            "AND i.is_primary_key = 1), '')+ ');' ;") #
+            #"AND i.is_primary_key = 1), '')+ '' ;") #
+        #= 1), '')+ ');' ;
+
+            sql=(
+                "    SELECT 'CREATE TABLE ' + '" + full_table_name  + "' + CHAR(13) + '(' + CHAR(13) + STUFF((  "
+                "        SELECT CHAR(13) + '    , [' + c.name + '] ' +   "
+                "            CASE WHEN c.is_computed = 1  "
+                "                THEN 'AS ' + OBJECT_DEFINITION(c.[object_id], c.column_id)  "
+                "                ELSE   "
+                "                    CASE WHEN c.system_type_id != c.user_type_id   "
+                "                        THEN '[' + SCHEMA_NAME(tp.[schema_id]) + '].[' + tp.name + ']'   "
+                "                        ELSE '[' + UPPER(tp.name) + ']'   "
+                "                    END  +   "
+                "                    CASE   "
+                "                        WHEN tp.name IN ('varchar', 'char', 'varbinary', 'binary')  "
+                "                            THEN '(' + CASE WHEN c.max_length = -1   "
+                "                                            THEN 'MAX'   "
+                "                                            ELSE CAST(c.max_length AS VARCHAR(5))   "
+                "                                        END + ')'  "
+                "                        WHEN tp.name IN ('nvarchar', 'nchar')  "
+                "                            THEN '(' + CASE WHEN c.max_length = -1   "
+                "                                            THEN 'MAX'   "
+                "                                            ELSE CAST(c.max_length / 2 AS VARCHAR(5))   "
+                "                                        END + ')'  "
+                "                        WHEN tp.name IN ('datetime2', 'time2', 'datetimeoffset')   "
+                "                            THEN '(' + CAST(c.scale AS VARCHAR(5)) + ')'  "
+                "                        WHEN tp.name = 'decimal'  "
+                "                            THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'  "
+                "                        ELSE ''  "
+                "                    END +  "
+                "                    CASE WHEN c.collation_name IS NOT NULL AND c.system_type_id = c.user_type_id   "
+                "                        THEN ' COLLATE ' + c.collation_name  "
+                "                        ELSE ''  "
+                "                    END +  "
+                "                    CASE WHEN c.is_nullable = 1   "
+                "                        THEN ' NULL'  "
+                "                        ELSE ' NOT NULL'  "
+                "                    END +  "
+                "                    CASE WHEN c.default_object_id != 0   "
+                "                        THEN ' CONSTRAINT [' + OBJECT_NAME(c.default_object_id) + ']' +   "
+                "                            ' DEFAULT ' + OBJECT_DEFINITION(c.default_object_id)  "
+                "                        ELSE ''  "
+                "                    END +   "
+                "                    CASE WHEN cc.[object_id] IS NOT NULL   "
+                "                        THEN ' CONSTRAINT [' + cc.name + '] CHECK ' + cc.[definition]  "
+                "                        ELSE ''  "
+                "                    END +  "
+                "                    CASE WHEN c.is_identity = 1   "
+                "                        THEN ' IDENTITY(' + CAST(IDENTITYPROPERTY(c.[object_id], 'SeedValue') AS VARCHAR(5)) + ',' +   "
+                "                                        CAST(IDENTITYPROPERTY(c.[object_id], 'IncrementValue') AS VARCHAR(5)) + ')'   "
+                "                        ELSE ''   "
+                "                    END   "
+                "            END  "
+                "        FROM sys.columns c WITH(NOLOCK)  "
+                "        JOIN sys.types tp WITH(NOLOCK) ON c.user_type_id = tp.user_type_id  "
+                "        LEFT JOIN sys.check_constraints cc WITH(NOLOCK)   "
+                "            ON c.[object_id] = cc.parent_object_id   "
+                "            AND cc.parent_column_id = c.column_id  "
+                "        WHERE c.[object_id] =  "+ str(object_id) +"  "
+                "        ORDER BY c.column_id  "
+                "        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 7, '      ') +   "
+                "        ISNULL((SELECT '  "
+                "        , CONSTRAINT [' + i.name + '] PRIMARY KEY ' +   "
+                "        CASE WHEN i.index_id = 1   "
+                "            THEN 'CLUSTERED'   "
+                "            ELSE 'NONCLUSTERED'   "
+                "        END +' (' + (  "
+                "        SELECT STUFF(CAST((  "
+                "            SELECT ', [' + COL_NAME(ic.[object_id], ic.column_id) + ']' +  "
+                "                    CASE WHEN ic.is_descending_key = 1  "
+                "                        THEN ' DESC'  "
+                "                        ELSE ''  "
+                "                    END  "
+                "            FROM sys.index_columns ic WITH(NOLOCK)  "
+                "            WHERE i.[object_id] = ic.[object_id]  "
+                "                AND i.index_id = ic.index_id  "
+                "            FOR XML PATH(N''), TYPE) AS NVARCHAR(MAX)), 1, 2, '')) + ')'  "
+                "        FROM sys.indexes i WITH(NOLOCK)  "
+                "        WHERE i.[object_id] = "+ str(object_id) + "  "
+                "            AND i.is_primary_key = 1), '') + CHAR(13) + ');'  "
+                )
         if(full_table_name=='[TEST1].[dbo].[Config]'):
-            print (create_script)
-            print('Len',str(len(create_script)))
+           print(sql)
+
+        if(full_table_name):
+            create_script=source.read_field(sql)
+            create_script=create_script.replace("     ,",",")
+        
+            if(full_table_name=='[TEST1].[dbo].[Config]'):
+                print (create_script)
+                print('Len:',str(len(create_script)))
+        else:
+            create_script=None
         return(create_script)
 
 
@@ -503,15 +603,26 @@ class dbhandler():
             database_name=self._database
         schema_name=self.schema_name(object_id)
         table_name=self.object_name(object_id)
+    
         #print("database:"+database_name  + str(object_id))
         #print(database_name  +  table_name)
-        full_name="[" + database_name + "]." + "[" + schema_name + "]." + "[" + table_name  + "]"
+        if(table_name,schema_name,database):
+            try:
+                full_name="[" + database_name + "]." + "[" + schema_name + "]." + "[" + table_name  + "]"
+            except:
+                full_name=None
+        else:
+            full_name=None
         return full_name
         
     def object_name(self,object_id):
         sql="select  name  from sys.objects where object_id=?"
         parameters=object_id
-        table_name=self.read_field(sql,parameters)
+        try:
+            table_name=self.read_field(sql,parameters)
+        except:
+            print('The object_id dont exists')
+            table_name=None
         return table_name
 
     def schema_name(self,object_id):
@@ -531,6 +642,7 @@ class dbhandler():
         #object_id=self.object_id(table)
         sql="select (OBJECTPROPERTY("+ str(object_id) + ", 'TableHasIdentity'))"
         #print (sql)
+
         if(self.read_field(sql)==1):
             return True
         else:
@@ -561,7 +673,7 @@ class dbhandler():
     def run(self,sql,parameters=None,type=2):
         success=False
         if(parameters):
-            print('to Execute (wp) -> '+ sql)
+            #print('to Execute (wp) -> '+ sql)
             success=self._connection.execute(sql,parameters)
         else:
             if(type==1):
@@ -569,7 +681,7 @@ class dbhandler():
                 scripts=[]
                 scripts = sql.split(';')
                 for script in scripts:
-                    print('to Execute -> '+ script)
+                    #print('to Execute -> '+ script)
                     if(script):
                         cursor.execute(script)
                 cursor.commit()
@@ -577,7 +689,7 @@ class dbhandler():
 
                 
             else:    
-                print('to Execute (wop) -> '+ sql)
+                #print('to Execute (wop) -> '+ sql)
                 success=self._connection.execute(sql)
        
        
@@ -633,6 +745,7 @@ class dbhandler():
         cursor=self._connection.cursor()
 
         values=list(zip(script_type,order_list,job_id,scripts))
+        #print(scripts)
         sql='INSERT INTO deploy_jobscripts ([Type],[Order],[Job_id],[Script]) values (?,?,?,? )'
         #print(values)
         cursor.executemany(sql,values)
