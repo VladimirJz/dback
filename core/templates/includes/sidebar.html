@@ -79,8 +79,29 @@
         </li> 
       </ul>
       </li>
+
+         <!--Main Menu --> 
+         <li class="yoo-sidebar-has-children"  {% if app == "deploy" %}class="active"{% endif%}>
+            <a href="#" >
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="hammer-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Deploy</span>
+              </span>
+            </a>
+            <ul class="yoo-sidebar-nav-dropdown">
+              <!-- sub Menu-->  
+              <li >
+                <a href="{%url 'deploy' %}">
+                  <span class="yoo-sidebar-link-title">
+                    <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="clipboard-outline"></ion-icon></span>
+                    <span class="yoo-sidebar-link-text">Jobs</span>
+                  </span>
+                </a>
+              </li> 
+            </ul>
+            </li>
       
-        
+        <!-- logout-->
           <!-- SIDE BAR ITEM-->         
           <li>
             <a href={% url 'logout' %} >

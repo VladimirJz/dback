@@ -50,7 +50,7 @@ class TableCategory(models.Model):
 
 class Tables(models.Model):
     Schema=CharField(max_length=20,null=True,help_text='Schema Database')
-    DataBase=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True)
+    DataBase=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True,related_name='TablesOf')
     Name=CharField(max_length=50,null=False,help_text='Database name')
     ObjectID=CharField(max_length=50,null=True,help_text='Internal SGDB ID')
     TableCategory=ForeignKey(TableCategory,on_delete=models.SET_NULL,null=True)

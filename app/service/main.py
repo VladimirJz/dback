@@ -9,7 +9,7 @@ source=connection('172.16.20.3','sa','#1Qazse4')
 source.database='IEEPO'
 
 target=connection('172.16.20.3','sa','#1Qazse4')
-target.database='TEST1'
+target.database='TEST3'
 
 repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
 
