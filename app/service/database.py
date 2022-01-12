@@ -136,12 +136,13 @@ class transfer_job():
         #print(sql)
         #get target active constrainsts
         #source=dbhandler(self._source)
-        target=dbhandler(self._target)
-        constraints=target.read_rows(sql,parameters)
+        source=dbhandler(self._source)
+        constraints=source.read_rows(sql,object_id)
         return constraints
         
     def disable_contraints(self,object_id,disable=True):
         constraints=self.get_constraints(object_id)
+        #print(constraints)
         source=dbhandler(self._source)
         target=dbhandler(self._target)
         scripts=[]
@@ -165,14 +166,17 @@ class transfer_job():
 
     def create_target_database(self):
         scripts=[]
-        scripts_types=[]
+        script_types=[]
+        script_phases=[]
         DDL=1
         DML=2
+        CREATE=1
 
         repo=dbhandler(self._repo,self._job)
         schemas_script=self.create_schemas()
         scripts.append(schemas_script)
-        scripts_types.append(DDL)
+        script_types.append(DDL)
+        script_phases.append(CREATE)
 
         # iterate
         sql=('select ct.[id],[ObjectID],[Name],[Schema],[Table_id] '
@@ -197,15 +201,71 @@ class transfer_job():
                 create_script=self.create_table(object_id)
                 if(create_script):
                     scripts.append(create_script)
-                    scripts_types.append(DML)
+                    script_types.append(DML)
+                    script_phases.append(CREATE)
                 else:
                     print('Table dont exists anymore')
                     #pass
             pass
             #print(scripts)
-            repo.add(scripts,scripts_types,progressbar=False)
+            repo.add(scripts,script_types,script_phases,progressbar=False)
 
-
+    def relational_objects(self):
+        sql=('select ct.[id],[ObjectID],[Name],[Schema],'
+            '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
+            '[StepBy],[Table_id] '
+            'from catalog_tables ct inner join (deploy_tablefilters tf '
+            'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
+            'on ct.id=tf.Table_id '
+            'where ct.Status=1 '
+            'and tfj.jobs_id=1')
+        DML=2
+        DDL=1
+        DATA=2
+        RELATIONAL=3
+        
+        repo=dbhandler(self._repo,self._job)
+        source=dbhandler(self._source)
+        target=dbhandler(self._target)
+    
+        #con=self.repo.get_connection()
+        #print(con)
+        filtered_tables=repo.get_resulset(self._repo,sql)
+        items=len(filtered_tables)
+        #enable_constraints=[]
+        with alive_bar(items, bar = 'smooth', unknown='arrows_in', spinner = 'waves') as bar:   # default setting
+            for filter in filtered_tables:
+                bar()
+                scripts=[]
+                script_types=[]
+                script_phases=[]
+                table_id=filter.get('id')
+                table=filter.get('Name')
+                schema=filter.get('Schema')
+                object_id=filter.get('ObjectID')
+                FilterType=filter.get('FilterType')
+                Column=filter.get('Column')
+                Lower=filter.get('LowerValue')
+                Upper=filter.get('UpperValue')
+                DataType=filter.get('ValuesDataType')
+                StepBy=filter.get('StepBy')
+                #object_id=repo.object_id(table)
+                print("restoring relational objects  : " + table)
+                full_table_name=source.full_table_name(object_id,target._database)   
+                if(full_table_name):
+                    constraints_script=self.disable_contraints(object_id,False)                    
+                    if(constraints_script):
+                        scripts.append(constraints_script)
+                        script_types.append(DDL)
+                        script_phases.append(RELATIONAL)
+                    indexes_script=self.create_indexes(object_id)
+                    if(indexes_script):
+                        scripts.append(indexes_script)
+                        script_types.append(DDL)
+                        script_phases.append(RELATIONAL)
+                if(scripts):
+                    repo.add(scripts,script_types,script_phases,progressbar=False)
+        pass
         
 
     def generate_data_scripts(self):
@@ -218,10 +278,11 @@ class transfer_job():
             'on ct.id=tf.Table_id '
             'where ct.Status=1 '
             'and tfj.jobs_id=1')
-        dml=2
-        ddl=1
-        script_type=dml
-
+        DML=2
+        DDL=1
+        DATA=2
+ 
+ 
         repo=dbhandler(self._repo,self._job)
         source=dbhandler(self._source)
         target=dbhandler(self._target)
@@ -230,11 +291,13 @@ class transfer_job():
         #print(con)
         filtered_tables=repo.get_resulset(self._repo,sql)
         items=len(filtered_tables)
+        #enable_constraints=[]
         with alive_bar(items, bar = 'smooth', unknown='arrows_in', spinner = 'waves') as bar:   # default setting
             for filter in filtered_tables:
                 bar()
                 scripts=[]
-                scripts_types=[]
+                script_types=[]
+                script_phases=[]
                 table_id=filter.get('id')
                 table=filter.get('Name')
                 schema=filter.get('Schema')
@@ -250,17 +313,24 @@ class transfer_job():
                 full_table_name=source.full_table_name(object_id,target._database)
                 if(full_table_name):
                     constraints_script=self.disable_contraints(object_id)
+                    
                     if(constraints_script):
                         scripts.append(constraints_script)
+                        script_types.append(DDL)
+                        script_phases.append(DATA)
+                        #constraints_script=self.disable_contraints(object_id,False)
+                        #enable_constraints.append(constraints_script)
                     truncate_script=self.clean_source(object_id)
                     #print (truncate_script)
                     if(truncate_script):
                         scripts.append(truncate_script)
-                        scripts_types.append(ddl)
+                        script_types.append(DDL)
+                        script_phases.append(DATA)
                     if(source.has_identity(object_id)):
                         enable_insert_id=self.enable_insert_identity(full_table_name,True)
                         scripts.append(enable_insert_id)
-                        scripts_types.append(ddl)
+                        script_types.append(DDL)
+                        script_phases.append(DATA)
                         
                     column_names=source.get_columnnames(object_id)
                     insert_into="INSERT INTO [" +schema + "].["+ table +"] (" + column_names + ")"
@@ -284,7 +354,8 @@ class transfer_job():
                                 begin=end + timedelta(days=1)
                                 sql=insert_into + from_table + where
                                 scripts.append(sql)
-                                scripts_types.append(dml)
+                                script_types.append(DML)
+                                script_phases.append(DATA)
 
                         if(DataType==1):#int
                             begin=int(Lower)
@@ -302,21 +373,25 @@ class transfer_job():
                                     begin=end + 1
                                 sql=insert_into + from_table + where
                                 scripts.append(sql)
-                                scripts_types.append(dml)
+                                script_types.append(DML)
+                                script_phases.append(DATA)
                                 #print(sql)
 
                     if(FilterType==0):#No Filter
                         sql=insert_into + from_table
                         scripts.append(sql)
-                        scripts_types.append(dml)
+                        script_types.append(DML)
+                        script_phases.append(DATA)
 
                     if(source.has_identity(object_id)):
                         disable_insert_id=self.enable_insert_identity(full_table_name,False)
                         scripts.append(disable_insert_id)   
-                        scripts_types.append(ddl)
+                        script_types.append(DDL)
+                        script_phases.append(DATA)
                     #print(scripts)
                 if(scripts):
-                    repo.add(scripts,scripts_types,progressbar=False)
+                    repo.add(scripts,script_types,script_phases,progressbar=False)
+            #repo.add(enable_constraints,script_types,script_phases,progressbar=False)
 
 
                     
@@ -360,10 +435,11 @@ class transfer_job():
             'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
             'on ct.id=tf.Table_id '
             'where tfj.jobs_id=1')
-        dml=2
-        script_type=dml
+        DML=2
+       
         # obtener parametros
-        
+        script_types=[]
+        script_phases=[]
         schema='dbo'
         field='Nombre'
         table='Empleados'
@@ -395,7 +471,7 @@ class transfer_job():
             scripts.append(sql)
         #print (scripts)
         if(scripts):
-            repo.add(scripts,script_type)
+            repo.add(scripts,script_types,script_phases)
 
       
     def create_schemas(self):
@@ -416,7 +492,7 @@ class transfer_job():
         return sql
       
 
-
+    #create table script source : shorturl.at/gsFMZ
     def create_table(self,object_id): 
         source=dbhandler(self._source)
         target=dbhandler(self._target)
@@ -594,7 +670,127 @@ class transfer_job():
             create_script=None
         return(create_script)
 
-
+    #create index source(thanks): shorturl.at/ioEHZ
+    def create_indexes(self,object_id):
+        source=dbhandler(self._source)
+        target=dbhandler(self._target)
+        scripts=[]
+        full_table_name=source.full_table_name(object_id,target._database)
+        if(full_table_name):
+            sql= ("SELECT  CASE si.index_id WHEN 0 THEN N'' "
+                "    ELSE  "
+                "        CASE is_primary_key WHEN 1 THEN  "
+                "            N'ALTER TABLE ' + '"   + full_table_name +  " ' +N' ADD CONSTRAINT ' + QUOTENAME(si.name) + N' PRIMARY KEY ' +  "
+                "                CASE WHEN si.index_id > 1 THEN N'NON' ELSE N'' END + N'CLUSTERED '  "
+                "            ELSE N'CREATE ' +  "
+                "                CASE WHEN si.is_unique = 1 then N'UNIQUE ' ELSE N'' END + "
+                "                CASE WHEN si.index_id > 1 THEN N'NON' ELSE N'' END + N'CLUSTERED ' + "
+                "                N'INDEX ' + QUOTENAME(si.name) + N' ON ' +'" + full_table_name + " '"
+                "        END + "
+                "        /* key def */ N'(' + key_definition + N')' + "
+                "        /* includes */ CASE WHEN include_definition IS NOT NULL THEN  "
+                "            N' INCLUDE (' + include_definition + N')' "
+                "            ELSE N'' "
+                "        END + "
+                "        /* filters */ CASE WHEN filter_definition IS NOT NULL THEN  "
+                "            N' WHERE ' + filter_definition ELSE N'' "
+                "        END + "
+                "        CASE WHEN row_compression_partition_list IS NOT NULL OR page_compression_partition_list IS NOT NULL  "
+                "            THEN N' WITH (' + "
+                "                CASE WHEN row_compression_partition_list IS NOT NULL THEN "
+                "                    N'DATA_COMPRESSION = ROW ' + CASE WHEN psc.name IS NULL THEN N'' ELSE + N' ON PARTITIONS (' + row_compression_partition_list + N')' END "
+                "                ELSE N'' END + "
+                "                CASE WHEN row_compression_partition_list IS NOT NULL AND page_compression_partition_list IS NOT NULL THEN N', ' ELSE N'' END + "
+                "                CASE WHEN page_compression_partition_list IS NOT NULL THEN "
+                "                    N'DATA_COMPRESSION = PAGE ' + CASE WHEN psc.name IS NULL THEN N'' ELSE + N' ON PARTITIONS (' + page_compression_partition_list + N')' END "
+                "                ELSE N'' END "
+                "            + N')' "
+                "            ELSE N'' "
+                "        END + "
+                "        ' ON [PRIMARY] '  "
+                #"		-- + CASE WHEN psc.name is null THEN ISNULL(QUOTENAME(fg.name),N'') ELSE psc.name + N' (' + partitioning_column.column_name + N')' END "
+                "        + N';' "
+                "    END AS script "
+                "     "
+                "FROM sys.indexes AS si "
+                "JOIN sys.tables AS t ON si.object_id=t.object_id "
+                "JOIN sys.schemas AS sc ON t.schema_id=sc.schema_id "
+                "LEFT JOIN sys.dm_db_index_usage_stats AS stat ON  "
+                "    stat.database_id = DB_ID()  "
+                "    and si.object_id=stat.object_id  "
+                "    and si.index_id=stat.index_id "
+                "LEFT JOIN sys.partition_schemes AS psc ON si.data_space_id=psc.data_space_id "
+                "LEFT JOIN sys.partition_functions AS pf ON psc.function_id=pf.function_id "
+                "LEFT JOIN sys.filegroups AS fg ON si.data_space_id=fg.data_space_id "
+                "/* Key list */ OUTER APPLY ( SELECT STUFF ( "
+                "    (SELECT N', ' + QUOTENAME(c.name) + "
+                "        CASE ic.is_descending_key WHEN 1 then N' DESC' ELSE N'' END "
+                "    FROM sys.index_columns AS ic  "
+                "    JOIN sys.columns AS c ON  "
+                "        ic.column_id=c.column_id   "
+                "        and ic.object_id=c.object_id "
+                "    WHERE ic.object_id = si.object_id "
+                "        and ic.index_id=si.index_id "
+                "        and ic.key_ordinal > 0 "
+                "    ORDER BY ic.key_ordinal FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'),1,2,'')) AS keys ( key_definition ) "
+                "/* Partitioning Ordinal */ OUTER APPLY ( "
+                "    SELECT MAX(QUOTENAME(c.name)) AS column_name "
+                "    FROM sys.index_columns AS ic  "
+                "    JOIN sys.columns AS c ON  "
+                "        ic.column_id=c.column_id   "
+                "        and ic.object_id=c.object_id "
+                "    WHERE ic.object_id = si.object_id "
+                "        and ic.index_id=si.index_id "
+                "        and ic.partition_ordinal = 1) AS partitioning_column "
+                "/* Include list */ OUTER APPLY ( SELECT STUFF ( "
+                "    (SELECT N', ' + QUOTENAME(c.name) "
+                "    FROM sys.index_columns AS ic  "
+                "    JOIN sys.columns AS c ON  "
+                "        ic.column_id=c.column_id   "
+                "        and ic.object_id=c.object_id "
+                "    WHERE ic.object_id = si.object_id "
+                "        and ic.index_id=si.index_id "
+                "        and ic.is_included_column = 1 "
+                "    ORDER BY c.name FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'),1,2,'')) AS includes ( include_definition ) "
+                "/* Partitions */ OUTER APPLY (  "
+                "    SELECT  "
+                "        COUNT(*) AS partition_count, "
+                "        CAST(SUM(ps.in_row_reserved_page_count)*8./1024./1024. AS NUMERIC(32,1)) AS reserved_in_row_GB, "
+                "        CAST(SUM(ps.lob_reserved_page_count)*8./1024./1024. AS NUMERIC(32,1)) AS reserved_LOB_GB, "
+                "        SUM(ps.row_count) AS row_count "
+                "    FROM sys.partitions AS p "
+                "    JOIN sys.dm_db_partition_stats AS ps ON "
+                "        p.partition_id=ps.partition_id "
+                "    WHERE p.object_id = si.object_id "
+                "        and p.index_id=si.index_id "
+                "    ) AS partition_sums "
+                "/* row compression list by partition */ OUTER APPLY ( SELECT STUFF ( "
+                "    (SELECT N', ' + CAST(p.partition_number AS VARCHAR(32)) "
+                "    FROM sys.partitions AS p "
+                "    WHERE p.object_id = si.object_id "
+                "        and p.index_id=si.index_id "
+                "        and p.data_compression = 1 "
+                "    ORDER BY p.partition_number FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'),1,2,'')) AS row_compression_clause ( row_compression_partition_list ) "
+                "/* data compression list by partition */ OUTER APPLY ( SELECT STUFF ( "
+                "    (SELECT N', ' + CAST(p.partition_number AS VARCHAR(32)) "
+                "    FROM sys.partitions AS p "
+                "    WHERE p.object_id = si.object_id "
+                "        and p.index_id=si.index_id "
+                "        and p.data_compression = 2 "
+                "    ORDER BY p.partition_number FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'),1,2,'')) AS page_compression_clause ( page_compression_partition_list ) "
+                "WHERE  "
+                "    si.type IN (0,1,2) /* heap, clustered, nonclustered */ "
+                "	AND t.object_id= " + str(object_id) + " "
+                "ORDER BY  si.index_id "
+                "    OPTION (RECOMPILE); ")
+            print(sql)
+            index_scripts=source.read_rows(sql)
+            for index in index_scripts:
+                script=index.get('script')
+                scripts.append(script)
+            sql = ' '.join([str(sentence) for sentence in scripts])
+        return sql
+        
 
 
 class dbhandler():
@@ -742,17 +938,17 @@ class dbhandler():
         #print('order')
         return order
 
-    def add(self,scripts,script_type,progressbar=False):
+    def add(self,scripts,script_type,script_phases,progressbar=False):
         if (progressbar):
             with alive_bar( bar = 'smooth', unknown='arrows_in', spinner = 'waves') as bar:  
-                self.insert(scripts,script_type)
+                self.insert(scripts,script_type,script_phases)
                 bar()
         else:
-            self.insert(scripts,script_type)
+            self.insert(scripts,script_type,script_phases)
         
 
 
-    def insert(self,scripts,script_type):
+    def insert(self,scripts,script_type,script_phase):
         order=self.get_order()
         count=len(scripts)
         order_list=[]
@@ -765,9 +961,9 @@ class dbhandler():
         #print(order_list)
         cursor=self._connection.cursor()
 
-        values=list(zip(script_type,order_list,job_id,scripts))
+        values=list(zip(script_type,order_list,job_id,scripts,script_phase))
         #print(scripts)
-        sql='INSERT INTO deploy_jobscripts ([Type],[Order],[Job_id],[Script]) values (?,?,?,? )'
+        sql='INSERT INTO deploy_jobscripts ([Type],[Order],[Job_id],[Script],[Phase]) values (?,?,?,?,?)'
         #print(values)
         
         cursor.executemany(sql,values)
