@@ -18,11 +18,9 @@ class DeployJobsListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         jobs_list=Jobs.objects.all()
-    #   tables_list = Tables.objects.filter(DataBase_id=self.kwargs['pk'],DetailOf__DataSizeMB__isnull=False).values('id','Schema','Name','Status','CreateDate','TableCategory__Category','DetailOf__DataSizeMB').order_by('-CreateDate')[:20]
         app='deploy'
         menu='jobs'
         context ['menu']=menu
-
         context['app']=app
         context['jobs_list']=jobs_list
         current_url = self.request.resolver_match.url_name

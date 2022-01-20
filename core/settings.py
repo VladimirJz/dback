@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'app',  # Enable the inner app ,
     'app.catalog',
     'app.tracking',
-    'app.deploy'
+    'app.deploy',
+    'app.backup',
 ]
 
 MIDDLEWARE = [
