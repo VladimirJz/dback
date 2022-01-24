@@ -1,4 +1,6 @@
+from email.policy import default
 from typing import TextIO
+from xmlrpc.client import TRANSPORT_ERROR
 from django.core.checks.messages import DEBUG
 from django.db import models
 
@@ -8,18 +10,29 @@ from django.contrib.auth.models import User
 from django.db.models.base import Model
 from django.db.models.fields import CharField, DateField, DecimalField, IntegerField, SmallIntegerField, TextField
 from django.db.models.fields.related import ForeignKey
+from django.forms import BooleanField
 from app.catalog.models import DataBases, Tables
 
 
 
 class Jobs(models.Model):
     Job=CharField(max_length=50,help_text='Job Name')
-    SourceDB=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True, related_name='SourceOf')
-    TargetDB=CharField(max_length=50,help_text='Destination Database')
+    JOB_TYPES=[(1,'Database deploy'),(2,'Data Dump')]
+    Type=models.SmallIntegerField(choices=JOB_TYPES, default=1,help_text='Job Type')
+    SourceDB=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True)
+    TargetDB=CharField(max_length=50,help_text='Destination Database',blank=True)
+    DestinationPath=CharField(max_length=500,help_text='Folder Destination',blank=True,null=True)
+    FieldSeparator=CharField(max_length=2,help_text='Separator',blank=True,null=True)
+    FilePerTable=models.BooleanField(default=True)
     Created=DateField(default=date.today)
+
     
     def __str__(self):
+        job=self.Job 
         return self.Job
+    
+    class Meta:
+        verbose_name_plural = "jobs"
 
 
 # class JobTables:
@@ -37,6 +50,12 @@ class TableFilters(models.Model):
     DATA_TYPES=[(1,'Numeric'),(2,'String'),(3,'Date')]
     ValuesDataType=models.SmallIntegerField(choices=DATA_TYPES,default=0,help_text='Data type')
     StepBy=SmallIntegerField(help_text='Iterate over')
+    
+    def __str__(self):
+        self.Table
+    
+    class Meta:
+        verbose_name_plural = "table filters"
 
 
 # class JobFilters:
@@ -51,6 +70,11 @@ class JobScripts(models.Model):
     Phase=models.SmallIntegerField(choices=SCRIPT_PHASES,help_text='Phase of execution',null=True,blank=True,default=1)
     Order=IntegerField(help_text='Order of exec')
     Script=TextField(help_text='Sentence SQL to execute',null=True)
+    
+    def __str__(self):
+        return self.Script[:80]
 
+    class Meta:
+        verbose_name_plural = "scripts"
 
 

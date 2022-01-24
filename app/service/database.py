@@ -8,6 +8,17 @@ from datetime import datetime, timedelta
 from time import sleep
 from alive_progress import alive_bar
 
+class location():
+    def __init__(self,path,user=None,passwd=None):
+
+    @property
+    def location(self):
+        return self._location
+    
+    @location.setter
+    def location(self,value):
+        self._location=value
+
 class connection():
     def __init__(self,server,user,passw):
         '''Server:IP or hostname | user: User | passws: password'''
@@ -89,11 +100,14 @@ class admin_connection(connection):
 
 
 class transfer_job():
-    def __init__(self,repo,source,target):
+    def __init__(self,repo,source,target=None):
         print('initialize')
         self._job   =repo.current_job
         self._repo  =repo.get_connection() # repo es una connexión
-        self._target=target.get_connection() # cambiar a targets
+        if(target!=None):
+            self._target=target.get_connection() # cambiar a targets
+        else:
+
         self._source=source.get_connection()
 
     
@@ -400,6 +414,8 @@ class transfer_job():
             
                 
         print('done')
+    
+    
     def deploy_database(self):
         print('Deploy Start...')
         print('Running Scripts')

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #db configuration
-from database import connection, transfer_job
+from database import connection, transfer_job,location
 from types import SimpleNamespace    
 from database import admin_connection
 
@@ -11,18 +11,22 @@ source.database='IEEPODIC'
 target=connection('172.16.20.3','sa','#1Qazse4')
 target.database='TEST4'
 
+dir=location('/home/vladimir/Documents/IE/')
+
 repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
 
 
 #repo.get_connection()
-syncdb=transfer_job(repo,source,target)
-syncdb.initialize()
-syncdb.create_target_database()
-syncdb.generate_data_scripts()
-syncdb.relational_objects()
-syncdb.deploy_database()
+#syncdb=transfer_job(repo,source,target)
+#syncdb.initialize()
+#syncdb.create_target_database()
+#syncdb.generate_data_scripts()
+#syncdb.relational_objects()
+#syncdb.deploy_database()
 #syncdb.ofuscate_scripts()
 #repo.get_connection()
+dumpdata=transfer_job(repo,source,dir)
+
 
 
 
