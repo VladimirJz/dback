@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'app.tracking',
     'app.deploy',
     'app.backup',
+    'app.inventory',
 ]
 
 MIDDLEWARE = [
