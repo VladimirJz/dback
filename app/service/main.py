@@ -1,5 +1,6 @@
 #!/usr/bin/python
 #db configuration
+from ast import dump
 from database import connection, transfer_job,location
 from types import SimpleNamespace    
 from database import admin_connection
@@ -13,7 +14,7 @@ target.database='TEST4'
 
 dir=location('/home/vladimir/Documents/IE/')
 
-repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
+repo=admin_connection('172.16.20.3','sa','#1Qazse4',2)
 
 
 #repo.get_connection()
@@ -25,7 +26,11 @@ repo=admin_connection('172.16.20.3','sa','#1Qazse4',1)
 #syncdb.deploy_database()
 #syncdb.ofuscate_scripts()
 #repo.get_connection()
-dumpdata=transfer_job(repo,source,dir)
+dumpdata=transfer_job(repo,source=source,target=target,location=dir)
+dumpdata.initialize()
+dumpdata.generate_data()
+dumpdata.deploy_database()
+
 
 
 

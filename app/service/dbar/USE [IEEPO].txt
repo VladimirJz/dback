@@ -1,0 +1,7 @@
+USE [IEEPO]
+GO
+CREATE NONCLUSTERED INDEX [IX_ab49d_nom_histpagos_Id_Emp_id_plaza] ON [dbo].[nom_histpagos]
+    ([Id_Emp], [id_plaza])
+    INCLUDE ([id_concepto], [Consecutivo], [Horas], [Pesos], [Fecha], [CC], [PesosExcento], [id_periodoPago], [Id_ProcesoNomina], [Desde], [Hasta], [esHistoria], [Fix])
+    WITH (SORT_IN_TEMPDB = OFF, PAD_INDEX = OFF, DATA_COMPRESSION = NONE, ONLINE = OFF, MAXDOP = 0);
+GO

@@ -66,6 +66,7 @@ class JobScripts(models.Model):
     SCRIPT_TYPES =[(1,'DDL'),(2,'DML'),(3,'Other')]
     SCRIPT_PHASES=[(1,'Building Objects'),(2,'Transfer Data'),(3,'Relational Objects'),(4,'Ending database')]
     Job=ForeignKey(Jobs,on_delete=models.SET_NULL,null=True)
+    Table=ForeignKey(Tables,on_delete=models.SET_NULL,null=True)
     Type=models.SmallIntegerField(choices=SCRIPT_TYPES,help_text='Type of script')
     Phase=models.SmallIntegerField(choices=SCRIPT_PHASES,help_text='Phase of execution',null=True,blank=True,default=1)
     Order=IntegerField(help_text='Order of exec')

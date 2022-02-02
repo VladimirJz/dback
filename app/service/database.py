@@ -7,9 +7,11 @@ import random
 from datetime import datetime, timedelta
 from time import sleep
 from alive_progress import alive_bar
+import pandas as pd
 
 class location():
     def __init__(self,path,user=None,passwd=None):
+        pass
 
     @property
     def location(self):
@@ -100,17 +102,16 @@ class admin_connection(connection):
 
 
 class transfer_job():
-    def __init__(self,repo,source,target=None):
+    def __init__(self,repo,source,target=None,location=None):
         print('initialize')
         self._job   =repo.current_job
         self._repo  =repo.get_connection() # repo es una connexión
+        self._source=source.get_connection() # cambiar a targets
         if(target!=None):
             self._target=target.get_connection() # cambiar a targets
         else:
+            self._dir='location'
 
-        self._source=source.get_connection()
-
-    
     def enable_insert_identity(self,table,value):
         sql="SET IDENTITY_INSERT " +  table  + " " 
         if(value==True):
@@ -421,7 +422,8 @@ class transfer_job():
         print('Running Scripts')
         target=dbhandler(self._target)
         repo=dbhandler(self._repo,self._job)
-        sql=("select [Order],[Type] ,Script from deploy_jobscripts where Job_id=1"
+        source=dbhandler(self._source)
+        sql=("select [Order],[Type] ,Script from deploy_jobscripts where Job_id=" + str(self._job) +
             "order by [Order] asc")
         deploy_scripts=repo.read_rows(sql)
         items=len(deploy_scripts)
@@ -430,14 +432,134 @@ class transfer_job():
                 bar()
                 sql_script=script.get('Script')
                 script_type=script.get('Type')
+                order_script=script.get('Order')
                 print("runing :"+ sql_script[:100] + "..")
                 #print("<--")
-                if(target.run(sql_script,type=script_type)):
-                    print('done..')
+                if(script_type==1):
+                    if(target.run(sql_script,type=script_type)):
+                        print('done..')
+                    else:
+                        print('===Error ! ==')
                 else:
-                    print('===Error ! ==')
+                    #rows=source.read_rows(sql_script)
+                    query_sql=pd.read_sql_query(sql_script,self._source)
+                    df=pd.DataFrame(query_sql)
+                    filename="C:\dumps\\" 
+                    filename=filename + 'File_' + str(order_script) + '_.csv'
+
+                    df.to_csv(filename,index = False)
+
+    def generate_data(self):
+        print('Data:')
+        sql=('select ct.[id],[ObjectID],[Name],[Schema],'
+            '[Column],[FilterType],[LowerValue],[UpperValue],[ValuesDataType],'
+            '[StepBy],[Table_id] '
+            'from catalog_tables ct inner join (deploy_tablefilters tf '
+            'inner join  deploy_tablefilters_Job tfj on tf.id=tfj.tablefilters_id) '
+            'on ct.id=tf.Table_id '
+            'where ct.Status=1 '
+            'and tfj.jobs_id=2')
+        DML=2
+        DDL=1
+        DATA=2
+ 
+ 
+        repo=dbhandler(self._repo,self._job)
+        source=dbhandler(self._source)
+        #target=dbhandler(self._target)
+    
+        #con=self.repo.get_connection()
+        #print(con)
+        filtered_tables=repo.get_resulset(self._repo,sql)
+        items=len(filtered_tables)
+        #enable_constraints=[]
+        with alive_bar(items, bar = 'smooth', unknown='arrows_in', spinner = 'waves') as bar:   # default setting
+            for filter in filtered_tables:
+                bar()
+                scripts=[]
+                script_types=[]
+                script_phases=[]
+                table_id=filter.get('id')
+                table=filter.get('Name')
+                schema=filter.get('Schema')
+                object_id=filter.get('ObjectID')
+                FilterType=filter.get('FilterType')
+                Column=filter.get('Column')
+                Lower=filter.get('LowerValue')
+                Upper=filter.get('UpperValue')
+                DataType=filter.get('ValuesDataType')
+                StepBy=filter.get('StepBy')
+                #object_id=repo.object_id(table)
+                print("get script data  from  : " + table)
+                full_table_name=source.full_table_name(object_id)
+                if(full_table_name):
+                    
+        
+                        
+                    column_names=source.get_columnnames(object_id)
+                    select="SELECT " + column_names 
+                    from_table =" FROM " + source.full_table_name(object_id) + ""
+                    #print(FilterType,DataType)
+                    # begin=int(Lower)
+
+                    if(FilterType==3): # iterate
+                        # id stepby =1 then use ==
+                        if (DataType==3): #date
+                            #begin=date(Lower)
+                            begin=datetime.strptime(Lower,"%Y-%m-%d")
+                            lastest=datetime.strptime(Upper,"%Y-%m-%d")
+                            #print(type(begin))
+                            #print(begin,lastest)
+                            while begin <=lastest:
+                                end=begin + timedelta(days=StepBy) 
+                                if(end>lastest):
+                                    end=lastest
+                                where=" WHERE " + Column + ">=" + begin.strftime("'%Y-%m-%d'")+ " and " + Column + "<=" + end.strftime("'%Y-%m-%d'") + ";"
+                                begin=end + timedelta(days=1)
+                                sql=select + from_table + where
+                                scripts.append(sql)
+                                script_types.append(DML)
+                                script_phases.append(DATA)
+
+                        if(DataType==1):#int
+                            begin=int(Lower)
+                            lastest=int(Upper)
+                            #print(begin,lastest)
+                            while begin<=lastest:
+                                end=begin+StepBy
+                                if(end>lastest):
+                                    end=lastest
+                                if(StepBy==1):
+                                    where=" where " + Column + "=" + str(begin) + ";"
+                                    begin+=StepBy
+                                else:
+                                    where=" where " + Column + ">=" + str(begin) + " and " + Column + "<=" + str(end) + ";"
+                                    begin=end + 1
+                                sql=select + from_table + where
+                                scripts.append(sql)
+                                script_types.append(DML)
+                                script_phases.append(DATA)
+                                #print(sql)
+
+                    if(FilterType==0):#No Filter
+                        sql=select + from_table
+                        scripts.append(sql)
+                        script_types.append(DML)
+                        script_phases.append(DATA)
+
+                if(scripts):
+                    repo.add(scripts,script_types,script_phases,progressbar=False)
+                    print (scripts)
+            #repo.add(enable_constraints,script_types,script_phases,progressbar=False)
 
 
+                    
+                    #print(enable_insert_id)
+                    #print (column_names)
+            
+                
+        print('done')
+    
         
 
         
