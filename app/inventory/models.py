@@ -3,6 +3,7 @@ from statistics import mode
 from django.db import models
 #from sqlalchemy import null
 from django.contrib.auth.models import User
+from app.company.models import Employ
 
 # Create your models here.
 
@@ -14,21 +15,40 @@ class Location(models.Model):
 class ItemCategory(models.Model):
     CategoryName=models.CharField(max_length=30,verbose_name='Category',help_text='Category')
 
+    # Accesorio de computo
+    # Equipo de Computo
+    # Equipo de Comunicaciones
+    # Herramienta y Equipo
+    # Mobiliario
+    # Software 6
+    
+
 class ItemStatus(models.Model):
     Status=models.CharField(max_length=10,help_text='Item Status',verbose_name='Item status')
 
+    #Activo 1
+    #Baja
+
+class ItemCondition(models.Model):
+    Condition=models.CharField(max_length=30,help_text='Item Condition',verbose_name='Item condition')
+# Nuevo 1
+# Usado
+# Reparado
+# Dañado
+
 class Item(models.Model):
-    Description=models.CharField(max_length=100,)
+    Description=models.CharField(max_length=200)
     Category=models.ForeignKey(ItemCategory,on_delete=models.SET_NULL,null=True,blank=True)
     Status=models.ForeignKey(ItemStatus,on_delete=models.SET_NULL,null=True,blank=True)
-    InternalID=models.CharField(max_length=100,help_text='Internal Id',blank=True)
-    Brand=models.CharField(max_length=30,help_text='Item Brand',blank=True)
-    Model=models.CharField(max_length=30,help_text='Item Model',blank=True)
-    SerialNumber=models.CharField(max_length=100,help_text='SN',blank=True)
-    SKU=models.CharField(max_length=100,help_text='SKU',blank=True)
-    Color=models.CharField(max_length=30,help_text='Item color',blank=True)
-    Dimensions=models.CharField(max_length=30,help_text='Item Size',blank=True)
-    AssignedTo=models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+    InternalID=models.CharField(max_length=100,help_text='Internal Id',null=True,blank=True)
+    Brand=models.CharField(max_length=30,help_text='Item Brand',null=True,blank=True)
+    Model=models.CharField(max_length=30,help_text='Item Model',null=True,blank=True)
+    SerialNumber=models.CharField(max_length=100,help_text='SN',null=True,blank=True)
+    SKU=models.CharField(max_length=100,help_text='SKU',null=True,blank=True)
+    Color=models.CharField(max_length=30,help_text='Item color',null=True,blank=True)
+    Dimensions=models.CharField(max_length=30,help_text='Item Size',null=True,blank=True)
+    Employ=models.ForeignKey(Employ,on_delete=models.SET_NULL,null=True)
+    Condition=models.ForeignKey(ItemCondition,on_delete=models.SET_NULL,null=True,blank=True)
 
 class IssuesType(models.Model):
     Description=models.CharField(max_length=30)
