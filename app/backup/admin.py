@@ -3,12 +3,24 @@ from django.contrib import admin
 # Register your models here.
 
 
-from app.backup.models import Backups,Locations,Jobs,Rotation,Status
+from app.backup.models import Backups,Locations,Jobs,RotationRules,Status
 # Register your models here.
-admin.site.register(Backups)
+
+
+class BackupsAdmin(admin.ModelAdmin):
+    list_display=('FileName','Database','CreationDate','IsAvailable','Status','SizeMB','Location')
+    def IsAvailable(self,obj):
+        return obj.Status_id==1
+    IsAvailable.boolean = True
+
+class RotationRulesAdmin(admin.ModelAdmin):
+    list_display=('Job','Order','RuleName','Location','RetentionDays')
+  
+
+admin.site.register(Backups,BackupsAdmin)
 admin.site.register(Locations)
 admin.site.register(Jobs)
-admin.site.register(Rotation)
+admin.site.register(RotationRules,RotationRulesAdmin)
 admin.site.register(Status)
 
 

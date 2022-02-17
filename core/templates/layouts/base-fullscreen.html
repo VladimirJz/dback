@@ -7,13 +7,24 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="author" content="YooKits" />
+  
+  {% load static%}
+  <script type='text/javascript' src="/static/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+  <script type='text/javascript' src="{% static 'jquery.formset.js' %}"></script>
+  <script>var $jq3 = jQuery.noConflict();</script>
+  
+  <script src="/static/assets/js/jquery-1.12.4.min.js"></script> 
+  
   <!-- Page Title -->
+
   <title>
     IEEPO - {% block title %}{% endblock %} | Infraestructura  
   </title>
   <!-- Favicon Icon -->
   <link rel="icon" href="/static/assets/img/favicon.png">
-  <!-- CSS -->
+  <!-- css -->
   <link rel="stylesheet" type="text/css" href="/static/assets/css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="/static/assets/css/fontawesome.css" />
   <link rel="stylesheet" type="text/css" href="/static/assets/css/iDashboard.css" />

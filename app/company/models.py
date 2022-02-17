@@ -49,7 +49,11 @@ class Employ(models.Model):
     PhoneNumberRegex = RegexValidator(regex = r"^\+?1?\d{8,15}$")
     PhoneNumber=models.CharField(validators = [PhoneNumberRegex], max_length = 16, blank=True, null=True)
     Office=models.ForeignKey(Office,on_delete=models.SET_NULL,null=True,blank=True)
-    
+    @property
+    def FullName(self):
+        return ''.join(
+            [self.Name,' ,', self.LastName])
     def __str__(self):
         return self.Name +' '+ self.LastName
     
+    # 

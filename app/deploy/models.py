@@ -19,7 +19,7 @@ class Jobs(models.Model):
     Job=CharField(max_length=50,help_text='Job Name')
     JOB_TYPES=[(1,'Database deploy'),(2,'Data Dump')]
     Type=models.SmallIntegerField(choices=JOB_TYPES, default=1,help_text='Job Type')
-    SourceDB=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True)
+    SourceDB=ForeignKey(DataBases,on_delete=models.SET_NULL,null=True, related_name='SourceFor')
     TargetDB=CharField(max_length=50,help_text='Destination Database',blank=True)
     DestinationPath=CharField(max_length=500,help_text='Folder Destination',blank=True,null=True)
     FieldSeparator=CharField(max_length=2,help_text='Separator',blank=True,null=True)

@@ -69,7 +69,7 @@
       </a>
       <ul class="yoo-sidebar-nav-dropdown">
         <!-- sub Menu-->  
-        <li >
+        <li {% if menu == "tables" %}class="active"{% endif%}>
           <a href="{%url 'tracking' %}">
             <span class="yoo-sidebar-link-title">
               <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="documents-outline"></ion-icon></span>
@@ -90,7 +90,7 @@
             </a>
             <ul class="yoo-sidebar-nav-dropdown">
               <!-- sub Menu-->  
-              <li >
+              <li {% if menu == "jobs" %}class="active"{% endif%}>
                 <a href="{%url 'deploy' %}">
                   <span class="yoo-sidebar-link-title">
                     <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="clipboard-outline"></ion-icon></span>
@@ -102,7 +102,7 @@
             </li>
 
         <!--Main Menu --> 
-        <li class="yoo-sidebar-has-children"  {% if app == "deploy" %}class="active"{% endif%}>
+        <li class="yoo-sidebar-has-children"  {% if app == "inventory" %}class="active"{% endif%}>
             <a href="#" >
             <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="archive-outline"></ion-icon></span>
@@ -111,11 +111,11 @@
             </a>
             <ul class="yoo-sidebar-nav-dropdown">
             <!-- sub Menu-->  
-            <li >
-                <a href="{%url 'deploy' %}">
+            <li {% if menu == "dashboard" %}class="active"{% endif%}>
+                <a href="{%url 'inventory' %}">
                 <span class="yoo-sidebar-link-title">
-                    <span class="yoo-sidebar-link-icon yoo-style1"><i class="fas fa-dolly fa-lg"></i></span>
-                    <span class="yoo-sidebar-link-text">Issues</span>
+                    <span class="yoo-sidebar-link-icon yoo-style1"><i class="fas fa-warehouse fa-lg"></i></span>
+                    <span class="yoo-sidebar-link-text">Dashboard</span>
                 </span>
                 </a>
             </li> 

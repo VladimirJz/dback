@@ -1,17 +1,20 @@
-<div class="container-sm">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        {% for key, value in breadcrumb.items %} 
-        <li class="breadcrumb-item"  {% ifequal key  '#' %}  aria-current="page"  {% endifequal  %} >
-          {% ifnotequal  key  '#' %} 
-            <a href="{% url key %}">
-          {% endifnotequal  %}
-          {{ value |upper}}</a></li>        
-        {% endfor %}
 
-      </ol>
-    </nav>
+
+
+<div class="container">
+    <!-- <div class="yoo-footer-content"> -->
+
+    <div class="yoo-footer-content">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item" ><a href="/">Home</a></li>
+            {% for key, value in breadcrumb.items %} 
+            <li class="breadcrumb-item"  {% ifequal key  '#' %}  aria-current="page"  {% endifequal  %} >
+              {% ifnotequal  key  '#' %} 
+                <a href="{% url key %}">
+              {% endifnotequal  %}
+              {{ value |title}}</a></li>        
+            {% endfor %}
+    
+        </ol>
+    </div>
 </div>
-
-
- 

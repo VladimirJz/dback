@@ -26,6 +26,10 @@ class Servers(models.Model):
         return self.Server
     def get_absolute_url(self):
         return "/servers/update/%i" % self.id
+    class Meta:
+        table_name='catalog_servers'
+        verbose_name_plural = "Servers"
+
 
 class DataBases(models.Model):
     Database=CharField(max_length=50,help_text='Database Name')
@@ -39,12 +43,19 @@ class DataBases(models.Model):
     RoutinesNum=IntegerField(help_text='Number of routines',default=0)
     Server=ForeignKey(Servers,on_delete=models.SET_NULL,null=True)
     def __str__(self):
-        return self.Database
+        return self.FriendlyName + ' (' + self.Database + ')'
+    
+    class Meta:
+        table_name='catalog_databases'
+        verbose_name_plural = "Databases"
+
 
 class TableCategory(models.Model):
     Category=CharField(max_length=40,help_text='Object Bussines Category')
     def __str__(self):
         return self.Category
+    class Meta:
+        table_name='catalog_tablecategory'
 
 
 
@@ -59,6 +70,10 @@ class Tables(models.Model):
     Status= models.SmallIntegerField(choices=TABLE_STATUS,default=1);
     def __str__(self):
         return self.Name
+
+    class Meta:
+        table_name='catalog_tables'
+        verbose_name_plural = "Tables"
 
 
 

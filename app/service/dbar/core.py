@@ -1,4 +1,5 @@
 from multiprocessing import ProcessError
+from struct import pack
 from django.db import connection
 from numpy import source
 import pyodbc
@@ -19,7 +20,7 @@ class database():
 
 class workspace(): 
     class job():
-        def __init__(self,repository_location,source_location,target_location):
+        def __init__(self,repository_location,source_location,target_location=None):
             self._repository_strcon=(repository_location.get_stringconnection())
             self._source_strcon=(source_location.get_stringconnection())
             self._target_strcon=(target_location.get_stringconnection())
@@ -134,7 +135,9 @@ class workspace():
             pass
     
     class dumpdata(job):
-            pass
+        pass
+    class backup(job):
+        pass
 
 
 
@@ -146,6 +149,7 @@ repol=objects.repository('172.16.20.3',1414,'sa','#1Qazse4',database='dba',engin
 deploy = workspace.deploy(repol,targetl,sourcel)
 deploy.job_id=1 #set job_id
 deploy.clean()
+backup=workspace.backup(repol,sourcel)
 
 
 print("---")

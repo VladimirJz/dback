@@ -9,6 +9,7 @@ from decouple import config
 from unipath import Path
 import dj_database_url
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = Path(__file__).parent
@@ -80,31 +81,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "sql_server.pyodbc",
-#         "NAME": "dba",
-#         "USER": "sa",
-#         "PASSWORD": "#1Qazse4",
-#         "HOST": "172.16.20.3",
-#         "PORT": "1433",
-#         "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server",  #SQL Server Native Client 11.0
-#         },
-#     },
-# }
-
-DATABASES = {
-    "default": {
-        "ENGINE": "sql_server.pyodbc",
-        "NAME": "dba",
-        "USER": "monitor",
-        "PASSWORD": "#1Qazse4#",
-        "HOST": "10.186.11.11\MSSQLServer2",
-        "PORT": "1414",
-        "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server",  #SQL Server Native Client 11.0
-        },
-    },
-}
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

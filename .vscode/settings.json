@@ -1,5 +1,14 @@
 {
     "files.exclude": {
+        "**/.git": false,
+        "**/.svn": false,
+        "**/.hg": false,
+        "**/CVS": false,
+        "**/.DS_Store": false,
+        "**/Thumbs.db": false,
+        "**/env": false
+    },
+    "explorerExclude.backup": {
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
@@ -7,6 +16,5 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/env": true
-    },
-    "explorerExclude.backup": null
+    }
 }

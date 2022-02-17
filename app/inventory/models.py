@@ -1,5 +1,4 @@
 from pkgutil import iter_modules
-from statistics import mode
 from django.db import models
 #from sqlalchemy import null
 from django.contrib.auth.models import User
@@ -24,13 +23,17 @@ class ItemCategory(models.Model):
     
 
 class ItemStatus(models.Model):
-    Status=models.CharField(max_length=10,help_text='Item Status',verbose_name='Item status')
+    StatusName=models.CharField(max_length=10,help_text='Item Status',verbose_name='Item status')
 
+    def __str__(self):
+        return self.Status
     #Activo 1
     #Baja
 
 class ItemCondition(models.Model):
-    Condition=models.CharField(max_length=30,help_text='Item Condition',verbose_name='Item condition')
+    ConditionName=models.CharField(max_length=30,help_text='Item Condition',verbose_name='Item condition')
+    def __str__(self):
+        return self.Condition
 # Nuevo 1
 # Usado
 # Reparado
@@ -49,9 +52,18 @@ class Item(models.Model):
     Dimensions=models.CharField(max_length=30,help_text='Item Size',null=True,blank=True)
     Employ=models.ForeignKey(Employ,on_delete=models.SET_NULL,null=True)
     Condition=models.ForeignKey(ItemCondition,on_delete=models.SET_NULL,null=True,blank=True)
+    
+    def __str__(self):
+        return self.Description[:80]
+
+    
+
+        
 
 class IssuesType(models.Model):
     Description=models.CharField(max_length=30)
+    def __str__(self):
+        return self.Description[:80]
 
 class Issues(models.Model):
     Type=models.ForeignKey(IssuesType,on_delete=models.SET_NULL,null=True)

@@ -1,5 +1,5 @@
 
-<div class="form-group">
+<div class="form-group form-group-md">
 <label for="{{ name }}">{{help_text}}</label>
 <div class="yoo-select">
 <select class="form-control" name="{{ name }}"{% if multiple %} multiple="multiple"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>{% for group_name, group_choices in optgroups %}{% if group_name %}
