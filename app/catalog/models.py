@@ -27,7 +27,7 @@ class Servers(models.Model):
     def get_absolute_url(self):
         return "/servers/update/%i" % self.id
     class Meta:
-        table_name='catalog_servers'
+        db_table='catalog_servers'
         verbose_name_plural = "Servers"
 
 
@@ -46,7 +46,7 @@ class DataBases(models.Model):
         return self.FriendlyName + ' (' + self.Database + ')'
     
     class Meta:
-        table_name='catalog_databases'
+        db_table='catalog_databases'
         verbose_name_plural = "Databases"
 
 
@@ -55,7 +55,7 @@ class TableCategory(models.Model):
     def __str__(self):
         return self.Category
     class Meta:
-        table_name='catalog_tablecategory'
+        db_table='catalog_tablecategory'
 
 
 
@@ -72,7 +72,7 @@ class Tables(models.Model):
         return self.Name
 
     class Meta:
-        table_name='catalog_tables'
+        db_table='catalog_tables'
         verbose_name_plural = "Tables"
 
 

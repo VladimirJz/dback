@@ -30,7 +30,7 @@ class Locations(models.Model):
     def __str__(self):
         return self.LocationName + ' (' + self.Host +')'
     class Meta:
-        table_name='backup_locations'
+        db_table='backup_locations'
         verbose_name_plural = "Locations"
 
 
@@ -45,7 +45,7 @@ class Jobs(models.Model):
     def __str__(self):
         return self.JobName
     class Meta:
-        table_name='backup_jobs'
+        db_table='backup_jobs'
         verbose_name_plural = "Jobs"
 
 class Status(models.Model):
@@ -55,7 +55,7 @@ class Status(models.Model):
     def __str__(self):
         return self.Description
     class Meta:
-        table_name='backup_status'
+        db_table='backup_status'
         verbose_name_plural = "Status"
 
 class Backups(models.Model):
@@ -92,7 +92,7 @@ class RotationRules(models.Model):
     ZipFormat= models.SmallIntegerField(choices=COMPRESS_FORMAT,default=1);
     
     class Meta:
-        table_name='backup_rotationrules'
+        db_table='backup_rotationrules'
         verbose_name_plural = "Rotation rules"
         ordering = ['Job', 'Order']
 

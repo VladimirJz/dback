@@ -8,6 +8,8 @@ from django.db.models.fields.related import ForeignKey
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.validators import RegexValidator
+from notifications.signals import notify
+from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _
 from sqlalchemy import null, true
@@ -21,7 +23,7 @@ class Office(models.Model):
 
 class UserProfile(models.Model):
     User = models.OneToOneField(User, on_delete=models.CASCADE)
-    BirthDate = models.DateField(null=True, blank=True)
+    BirthDate = models.DateField(null=True, blank=True,default=datetime.now)
 
     
     @receiver(post_save, sender=User)
@@ -29,11 +31,19 @@ class UserProfile(models.Model):
         if created:
             UserProfile.objects.create(user=instance)
 
+
     @receiver(post_save, sender=User)
     def save_user_profile(sender, instance, **kwargs):
         instance.UserProfile.save()
     def __str__(self):
         return self.User.first_name
+    
+    @receiver(post_save, sender=User)
+    def send_notify(sender,instance, **kwargs):
+        recipient = instance.content_object.get_user()
+        message = 'se ha agreagdo el usuario {0}'( instance.user.username )
+        notify.send(instance.user, recipient=recipient, verb=message, action_object=instance)
+
 
 
 class Employ(models.Model):
@@ -56,4 +66,10 @@ class Employ(models.Model):
     def __str__(self):
         return self.Name +' '+ self.LastName
     
-    # 
+    @receiver(post_save, sender=User)
+    def send_notify(sender,instance, **kwargs):
+        recipient = instance.content_object.get_user()
+        message = 'se ha agreagdo el empleado {0}'( instance.user.username )
+        notify.send(instance.user, recipient=recipient, verb=message, action_object=instance)
+
+    
