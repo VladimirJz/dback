@@ -1,3 +1,6 @@
+from notifications.signals import notify
+from django.contrib.auth.models import User
+
 from re import split
 from django.shortcuts import render,reverse
 from django.contrib import messages
@@ -8,6 +11,7 @@ from app.tracking.models import TablesDetail
 from django.urls import resolve
 from app.catalog.forms import NewServerForm
 from core.utils import get_breadcrumb
+
 
 # Create your views here.
 class TablesListVieww(ListView): 
@@ -95,7 +99,8 @@ class ServerUpdateView(SuccessMessageMixin,UpdateView):
     context_object_name="server_update"
     template_name='catalog/servers_update.html'
     success_message = "Server %(Server)s was update successfully"
-
+    u = User.objects.get(username='vladimir')
+    #notify.send(u, recipient=u, verb='you reached level 16 ',message='actualizado')
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app='catalog'
@@ -107,13 +112,16 @@ class ServerUpdateView(SuccessMessageMixin,UpdateView):
         context['app']=app
         return context
 
-class ServerCreateView(SuccessMessageMixin,CreateView):
+class ServerCreateView( SuccessMessageMixin,CreateView):
     model = Servers
     template_name = 'catalog/servers_new.html'
     context_object_name="server_create"
     form_class = NewServerForm
+    u = User.objects.get(username='vladimir')
+    #count=Notification.objects.all().count()
     success_message = "Server %(Server)s was registered successfully"
     success_url = "/servers/new/"
+   # notify.send(u, recipient=u, verb='you reached level 16  ')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

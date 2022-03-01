@@ -4,7 +4,7 @@ from django.db.models.deletion import CASCADE
 from django.db.models.fields import CharField, DateTimeField, SmallIntegerField
 from django.db.models.fields.related import ForeignKey
 from app.catalog.models import Tables,DataBases
-
+from datetime import datetime,timedelta
 # Create your models here.
 
 
@@ -21,7 +21,7 @@ class RotationJob(models.Model):
 
 
 class Locations(models.Model):
-    LocationName=models.CharField(max_length=50,help_text='Location name');
+    LocationName=models.CharField(max_length=50,help_text='Location name',verbose_name='Location');
     Host=models.CharField(max_length=30,help_text='Name or IP of host', null=True)
     AbsolutePath=models.CharField(max_length=200,help_text='Absolute(local) path to backup file',null=True)  ; 
     RemotePath=models.CharField(max_length=200,help_text='Destination Remote path',null=True,blank=True)  ;
@@ -49,7 +49,7 @@ class Jobs(models.Model):
         verbose_name_plural = "Jobs"
 
 class Status(models.Model):
-    Status=models.CharField(max_length=20,help_text='Status');
+    Status=models.CharField(max_length=20,help_text='Status',verbose_name="Status");
     Description=models.CharField(max_length=200,help_text='Status description',null=True,blank=True)
     
     def __str__(self):
@@ -59,10 +59,10 @@ class Status(models.Model):
         verbose_name_plural = "Status"
 
 class Backups(models.Model):
-    Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True);
-    Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True);
-    Status=models.ForeignKey(Status,on_delete=models.SET_NULL,null=True);
-    Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True);
+    Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True,help_text="Database");
+    Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True,help_text="Job");
+    Status=models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,help_text="Status");
+    Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True,help_text="Location");
     CreationDate=models.DateField(null=True,blank=True,help_text='Create date');
     StartBackup=models.DateTimeField(null=True,blank=True,help_text='Backup start time');
     EndBackup=models.DateTimeField(blank=True,help_text='Backup end time',null=True);
@@ -70,12 +70,15 @@ class Backups(models.Model):
     SizeMB=models.DecimalField(max_digits=20,decimal_places=2,help_text='Size MB',null=True,default=0);
     Size=models.BigIntegerField(help_text='Size',null=True,default=0);
     Comments=models.TextField(help_text='Comments',null=True,blank=True)
+    Updated = models.DateTimeField(verbose_name='Updated on', auto_now=True)
     class Meta:
         db_table = "backup_files"
         verbose_name_plural = "Backups"
 
     def __str__(self):
             return self.FileName
+    def get_absolute_url(self):
+        return "/backup/update/%i" % self.id
   
 
 class RotationRules(models.Model):

@@ -24,4 +24,5 @@ urlpatterns = [
     path("", include("app.tracking.urls")),
     path("", include("app.deploy.urls")),
     path("",include("app.inventory.urls")),
+    path("",include("app.backup.urls")),
 ]

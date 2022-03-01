@@ -19,7 +19,7 @@
       <div class="yoo-sidebar-nav">
         <ul class="yoo-sidebar-nav-list yoo-mp0">
        <!--Main Menu --> 
-       <li class="yoo-sidebar-has-children"  {% if app == "catalog" %}class="active"{% endif%}>
+       <li class=" yoo-sidebar-has-children"  {% if app == "catalog" %}class="active"{% endif%}>
         <a href="#" >
           <span class="yoo-sidebar-link-title">
             <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="cog-outline"></ion-icon></span>
@@ -58,6 +58,36 @@
         </ul>
       </li>
       <!-- << Main Menu --> 
+       <!--Main Menu --> 
+       <li class="yoo-sidebar-has-children"  {% if app == "backup" %}class="active"{% endif%}>
+        <a href="#" >
+          <span class="yoo-sidebar-link-title">
+            <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="cloud-done-outline"></ion-icon></span>
+            <span class="yoo-sidebar-link-text">Backups</span>
+          </span>
+        </a>
+        <ul class="yoo-sidebar-nav-dropdown">
+        <!-- sub Menu-->  
+          <li {% if menu == "backup" %}class="active"{% endif%}>
+            <a href="{%url 'backup' %}">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="calendar-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">All Backups</span>
+              </span>
+            </a>
+          </li> 
+        
+          <!-- sub Menu-->  
+          <li {% if menu == "update" %}class="active"{% endif%}>
+            <a href="{%url 'backup_lost' %}">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="locate-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Lost</span>
+              </span>
+            </a>
+          </li> 
+        </ul>
+        </li>
 
       <!--Main Menu --> 
       <li class="yoo-sidebar-has-children"  {% if app == "tracking" %}class="active"{% endif%}>

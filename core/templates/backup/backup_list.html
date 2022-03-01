@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+{% load floppyforms %}
+{% load core_extras %}
+{% block title %} Dashboard {% endblock %} 
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+  <link rel="stylesheet" type="text/css" href="/static/assets/css/jqvmap.min.css" />
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div>
+<div class="container">
+  <div class="yoo-uikits-heading">
+
+
+
+    <h2 class="yoo-uikits-title">
+        {% if menu == "backup" %}
+        All backups
+        {% elif menu == "update" %}
+        Lost backups
+        {% endif %}
+    </h2>
+  </div>
+</div>
+
+<div class="yoo-height-b30 yoo-height-lg-b30"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+        <form  method="post" id="update_form"">
+            {% csrf_token %}
+                <!--Header and Modal info -->
+                {% with template_info=view.template_name|slice:'-5'|addstr:'_info.html'     %}
+                {% include template_info  %}
+                {% endwith %}
+      
+                <!--   - - - - - - - --   -->
+
+        <!--backup-->
+
+        <div class="yoo-card-body">
+          {% include 'includes/messages.html' %}
+          <div class="yoo-padd-lr-20">
+              <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+            <table class="table table-hover">
+              <thead>
+                  <tr>
+                  <th scope="col"></th>
+                  <th scope="col">id</th>
+                  <th scope="col">Filename</th>
+                  <th scope="col">Location</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Comments</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for backup in backup_list %}
+                <tr {% if backup.Status_id == 2 %} class="table-danger"{%elif backup.Status_id == 3 %} class='text-danger' {%elif backup.Status_id == 4  %} class='table-secondary' {%elif backup.Status_id == 5  %} class='text-muted'  {%endif%} >
+                    <td>
+                        {% if menu == "update" %}
+                        <input name="selected" class="custom-control-input" type='checkbox'  value="{{ backup.id }}"></input>
+                        {% endif %}
+                    </td>
+                  <th scope="row"  >{{ backup.id}}</th>
+                  <td>{{ backup.FileName}}</td>
+                  <td>{{ backup.Location}}</td>
+                  <td >{{ backup.Status}}</td>
+                  <td>{{ backup.Comments}}</td>
+                  <td> 
+                    {% if menu == "update" %}
+                    <button type="button" onclick="location.href='#';" class="yoo-card-btn"><ion-icon name="create-outline"></ion-icon></button>
+                    {% endif %}
+                  </td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- table end-->
+        
+            <div class="modal-footer">
+             
+            </div>
+            
+            <div class="yoo-height-b20 yoo-height-lg-b20"></div>
+          </div>
+        </div>
+    </form>
+    </div><!-- .yoo-card -->
+    
+    
+</div><!-- .col -->
+</div>
+</div>
+<div class="yoo-height-b30 yoo-height-lg-b30"></div>
+
+
+
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="/static/assets/js/apexcharts.min.js"></script>
+<script src="/static/assets/js/apexcharts.initialize.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.min.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.usa.js"></script>
+<script src="/static/assets/js/svg-maps/jquery.vmap.main.js"></script>
+
+{% endblock javascripts %}
