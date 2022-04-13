@@ -21,7 +21,7 @@ class RotationJob(models.Model):
 
 
 class Locations(models.Model):
-    LocationName=models.CharField(max_length=50,help_text='Location name');
+    LocationName=models.CharField(max_length=50,help_text='Location name',verbose_name='Location');
     Host=models.CharField(max_length=30,help_text='Name or IP of host', null=True)
     AbsolutePath=models.CharField(max_length=200,help_text='Absolute(local) path to backup file',null=True)  ; 
     RemotePath=models.CharField(max_length=200,help_text='Destination Remote path',null=True,blank=True)  ;
@@ -49,7 +49,7 @@ class Jobs(models.Model):
         verbose_name_plural = "Jobs"
 
 class Status(models.Model):
-    Status=models.CharField(max_length=20,help_text='Status');
+    Status=models.CharField(max_length=20,help_text='Status',verbose_name="Status");
     Description=models.CharField(max_length=200,help_text='Status description',null=True,blank=True)
     
     def __str__(self):
@@ -59,10 +59,10 @@ class Status(models.Model):
         verbose_name_plural = "Status"
 
 class Backups(models.Model):
-    Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True);
-    Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True);
-    Status=models.ForeignKey(Status,on_delete=models.SET_NULL,null=True);
-    Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True);
+    Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True,help_text="Database");
+    Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True,help_text="Job");
+    Status=models.ForeignKey(Status,on_delete=models.SET_NULL,null=True,help_text="Status");
+    Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True,help_text="Location");
     CreationDate=models.DateField(null=True,blank=True,help_text='Create date');
     StartBackup=models.DateTimeField(null=True,blank=True,help_text='Backup start time');
     EndBackup=models.DateTimeField(blank=True,help_text='Backup end time',null=True);
@@ -77,6 +77,8 @@ class Backups(models.Model):
 
     def __str__(self):
             return self.FileName
+    def get_absolute_url(self):
+        return "/backup/update/%i" % self.id
   
 
 class RotationRules(models.Model):

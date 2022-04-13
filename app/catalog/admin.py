@@ -8,3 +8,4 @@ admin.site.register(Tables)
 admin.site.register(TableCategory)
 admin.site.register(DataBases)
 
+

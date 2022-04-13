@@ -8,6 +8,7 @@ from app.backup.models import Backups,Locations,Jobs,RotationRules,Status
 
 
 class BackupsAdmin(admin.ModelAdmin):
+    list_filter=('Location__LocationName','Status__Status')
     list_display=('FileName','Database','CreationDate','IsAvailable','Status','SizeMB','Location')
     def IsAvailable(self,obj):
         return obj.Status_id==1

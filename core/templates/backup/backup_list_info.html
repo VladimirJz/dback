@@ -1,0 +1,43 @@
+{{block_headerinfo}}
+<div class="yoo-card yoo-style1">
+  <div class="yoo-card-heading">
+      <div class="yoo-card-heading-left">
+      <h2 class="yoo-card-title">BACKUPS </h2>
+      </div>
+      <div class="yoo-card-heading-right">
+          <!-- toolbar -->
+          <div class="btn-group" role="group" aria-label="Vertical button group">
+            {% comment %} <button type="button"  data-toggle="modal" data-target="#help_info" class="btn btn-blue  btn-lg btn-md btn-sm"><ion-icon name="checkbox-outline"></ion-icon>Update </button> {% endcomment %}
+            <button type="button"  data-toggle="modal" data-target="#help_info" title="Update selected"  ripple="ripple" ripple-color="rgba(0, 0, 0, 0.3)" class="btn btn-outline-light btm-sm"><i class="fas fa-edit"></i>  </button>
+          </div>
+      {% comment %} <button type="button" class="yoo-card-btn" data-toggle="modal" data-target="#help_info"><ion-icon name="help"></ion-icon></button> {% endcomment %}
+           <!-- Code Modal -->
+          <div class="modal fade" id="help_info">
+              <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                       <h5 class="modal-title">Update selected .. </h5>
+                       <a href="#" data-dismiss="modal">
+                   
+                    <ion-icon name="close-circle"></ion-icon>
+                    </a>
+                  </div>
+                  <div class="modal-body">
+                  <!--    
+                    
+                                    -->
+                  New Location:{{ update_lost_form.location}}
+                
+                  New Status:{{ update_lost_form.status}}
+                  </div>
+                  <div class="modal-footer">
+                  <input type='submit'value="Update" class='btn btn-primary btn-md'></input>
+                  <button type="button" class="btn btn-secundary" data-dismiss="modal">Close</button>
+                  </div>
+              </div>
+
+          </div>
+      </div>
+  </div> <!-- heading-->
+</div>
+{{endblock}}

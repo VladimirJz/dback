@@ -146,27 +146,49 @@
                 <span class="yoo-toggle-btn yoo-ex-nav-btn yoo-notice-btn">
                   <ion-icon name="notifications"></ion-icon>
                   {% notifications_unread as unread_count %}
+<<<<<<< HEAD
                   <span class="yoo-ex-nav-label">{{ unread_count }}</span>
+=======
+                  <span class="yoo-ex-nav-label">{{ unread_count }}{% live_notify_badge %}</span>
+>>>>>>> refs/remotes/origin/master
                 </span>
                 <div class="yoo-dropdown yoo-notify-dropdown">
                   <h2 class="yoo-nofify-title">Notification</h2>
                   <ul class="yoo-nofify-list yoo-style1 yoo-mp0">
 
+<<<<<<< HEAD
                     {% for n in notify_list  %}
                     {{ n }}
                     {%endfor%}
 
                         <li>
+=======
+                    {% for notification in  user.notifications.unread %}
+                    <li>
+>>>>>>> refs/remotes/origin/master
                         <a href="#" class="yoo-nofify-list-in">
                             <div class="yoo-nofify-icon yoo-gray-box">
                             <ion-icon name="people"></ion-icon>
                             </div>
                             <div class="yoo-nofify-text">
+<<<<<<< HEAD
                             <h3 class="yoo-nofify-text-head">Invite your friends to dashboard.</h3>
                             <span class="yoo-notify-time">5 hour ago</span>
                             </div>
                         </a>
                         </li>
+=======
+                            <h3 class="yoo-nofify-text-head">
+                                {{ notification.verb }}
+                                <span class="yoo-notify-time">5 hour ago</span>
+                            </div>
+                        </a>
+                        </li>
+                    {%endfor%}
+
+                       
+                           
+>>>>>>> refs/remotes/origin/master
 
 
                   </ul>
