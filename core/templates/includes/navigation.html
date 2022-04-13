@@ -1,4 +1,4 @@
-
+{% load notifications_tags %} 
   <div class="yoo-height-b60 yoo-height-lg-b60"></div>
   <header class="yoo-header yoo-style1 yoo-sticky-menu">
     <div class="yoo-main-header">
@@ -145,66 +145,30 @@
               <div class="yoo-toggle-body yoo-notice-area yoo-style1">
                 <span class="yoo-toggle-btn yoo-ex-nav-btn yoo-notice-btn">
                   <ion-icon name="notifications"></ion-icon>
-                  <span class="yoo-ex-nav-label">3</span>
+                  {% notifications_unread as unread_count %}
+                  <span class="yoo-ex-nav-label">{{ unread_count }}</span>
                 </span>
                 <div class="yoo-dropdown yoo-notify-dropdown">
                   <h2 class="yoo-nofify-title">Notification</h2>
                   <ul class="yoo-nofify-list yoo-style1 yoo-mp0">
-                    <li>
-                      <a href="#" class="yoo-nofify-list-in">
-                        <div class="yoo-nofify-icon yoo-gray-box">
-                          <ion-icon name="people"></ion-icon>
-                        </div>
-                        <div class="yoo-nofify-text">
-                          <h3 class="yoo-nofify-text-head">Invite your friends to dashboard.</h3>
-                          <span class="yoo-notify-time">5 hour ago</span>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" class="yoo-nofify-list-in">
-                        <div class="yoo-nofify-icon yoo-green-box">
-                          <ion-icon name="today"></ion-icon>
-                        </div>
-                        <div class="yoo-nofify-text">
-                          <h3 class="yoo-nofify-text-head">3 Tasks pending this month.</h3>
-                          <span class="yoo-notify-time">6 hour ago</span>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" class="yoo-nofify-list-in">
-                        <div class="yoo-nofify-icon yoo-light-blue-box">
-                          <ion-icon name="heart"></ion-icon>
-                        </div>
-                        <div class="yoo-nofify-text">
-                          <h3 class="yoo-nofify-text-head">7 People loved your activity.</h3>
-                          <span class="yoo-notify-time">9 hour ago</span>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" class="yoo-nofify-list-in">
-                        <div class="yoo-nofify-icon yoo-gray-box">
-                          <ion-icon name="chatbox"></ion-icon>
-                        </div>
-                        <div class="yoo-nofify-text">
-                          <h3 class="yoo-nofify-text-head">John commented on activity.</h3>
-                          <span class="yoo-notify-time">1 day ago</span>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" class="yoo-nofify-list-in">
-                        <div class="yoo-nofify-icon yoo-blue-box">
-                          <img src="/static/assets/img/user/1.jpg" alt="msg1" />
-                        </div>
-                        <div class="yoo-nofify-text">
-                          <h3 class="yoo-nofify-text-head">Click your picture or add an account.</h3>
-                          <span class="yoo-notify-time">2 days ago</span>
-                        </div>
-                      </a>
-                    </li>
+
+                    {% for n in notify_list  %}
+                    {{ n }}
+                    {%endfor%}
+
+                        <li>
+                        <a href="#" class="yoo-nofify-list-in">
+                            <div class="yoo-nofify-icon yoo-gray-box">
+                            <ion-icon name="people"></ion-icon>
+                            </div>
+                            <div class="yoo-nofify-text">
+                            <h3 class="yoo-nofify-text-head">Invite your friends to dashboard.</h3>
+                            <span class="yoo-notify-time">5 hour ago</span>
+                            </div>
+                        </a>
+                        </li>
+
+
                   </ul>
                   <a href="#" class="yoo-btn yoo-style2">SEE ALL <ion-icon name="chevron-forward"></ion-icon></a>
                 </div>

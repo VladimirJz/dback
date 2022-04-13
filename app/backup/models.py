@@ -4,7 +4,7 @@ from django.db.models.deletion import CASCADE
 from django.db.models.fields import CharField, DateTimeField, SmallIntegerField
 from django.db.models.fields.related import ForeignKey
 from app.catalog.models import Tables,DataBases
-
+from datetime import datetime,timedelta
 # Create your models here.
 
 
@@ -70,6 +70,7 @@ class Backups(models.Model):
     SizeMB=models.DecimalField(max_digits=20,decimal_places=2,help_text='Size MB',null=True,default=0);
     Size=models.BigIntegerField(help_text='Size',null=True,default=0);
     Comments=models.TextField(help_text='Comments',null=True,blank=True)
+    Updated = models.DateTimeField(verbose_name='Updated on', auto_now=True)
     class Meta:
         db_table = "backup_files"
         verbose_name_plural = "Backups"
