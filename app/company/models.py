@@ -12,7 +12,7 @@ from notifications.signals import notify
 from datetime import datetime
 
 from django.utils.translation import ugettext_lazy as _
-from sqlalchemy import null, true
+#from sqlalchemy import null, true
 # Create your models here.
 
 class Office(models.Model):

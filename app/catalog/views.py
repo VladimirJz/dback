@@ -118,16 +118,10 @@ class ServerCreateView( SuccessMessageMixin,CreateView):
     context_object_name="server_create"
     form_class = NewServerForm
     u = User.objects.get(username='vladimir')
-<<<<<<< HEAD
-    success_message = "Server %(Server)s was registered successfully"
-    success_url = "/servers/new/"
-    notify.send(u, recipient=u, verb='you reached level 12')
-=======
     #count=Notification.objects.all().count()
     success_message = "Server %(Server)s was registered successfully"
     success_url = "/servers/new/"
    # notify.send(u, recipient=u, verb='you reached level 16  ')
->>>>>>> refs/remotes/origin/master
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

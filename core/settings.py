@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'notifications',
     'floppyforms',
     'core',
-    'app',  # Enable the inner app ,
+    'app', 
     'app.company',
     'app.catalog',
     'app.tracking',
