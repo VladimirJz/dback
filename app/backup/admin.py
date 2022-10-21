@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 
 
-from app.backup.models import Backups,Locations,Jobs,RotationRules,Status
+from app.backup.models import Backups, JobSchedule,Locations,Jobs,RotationRules,Status
 # Register your models here.
 
 
@@ -22,7 +22,8 @@ admin.site.register(Backups,BackupsAdmin)
 admin.site.register(Locations)
 admin.site.register(Jobs)
 admin.site.register(RotationRules,RotationRulesAdmin)
-admin.site.register(Status)
+#admin.site.register(Status)
+admin.site.register(JobSchedule)
 
 
 

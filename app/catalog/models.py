@@ -30,7 +30,15 @@ class Servers(models.Model):
         db_table='catalog_servers'
         verbose_name_plural = "Servers"
 
+class Credentials(models.Model):
+    Server=models.ForeignKey(Servers,on_delete=models.SET_NULL,null=True, related_name='his_credentials')
+    User=models.CharField(max_length=30, help_text='User name', verbose_name='User')
+    Pass=models.CharField(max_length=30, help_text='Password',verbose_name='Password')
 
+    class Meta:
+        db_table='catalog_secures'
+        verbose_name_plural = "Credentials"
+        
 class DataBases(models.Model):
     Database=CharField(max_length=50,help_text='Database Name')
     FriendlyName=CharField(max_length=50,help_text='Friendly Name',null=True)

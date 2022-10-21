@@ -5,6 +5,7 @@ from django.db.models.fields import CharField, DateTimeField, SmallIntegerField
 from django.db.models.fields.related import ForeignKey
 from app.catalog.models import Tables,DataBases
 from datetime import datetime,timedelta
+from dateutil import parser
 # Create your models here.
 
 
@@ -48,6 +49,20 @@ class Jobs(models.Model):
         db_table='backup_jobs'
         verbose_name_plural = "Jobs"
 
+
+class JobSchedule(models.Model):
+    Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True);
+    SCHEDULE = [(1, 'Daily'),(2, 'Weekend'),];
+    Schedule=models.SmallIntegerField(choices=SCHEDULE,default=1);
+    
+    def __str__(self):
+        job=Jobs.objects.get(id=4)
+        return job.JobName +' - '+ self.get_Schedule_display()
+   
+    class Meta:
+        db_table='backup_schedules'
+        verbose_name_plural="Schedule"
+
 class Status(models.Model):
     Status=models.CharField(max_length=20,help_text='Status',verbose_name="Status");
     Description=models.CharField(max_length=200,help_text='Status description',null=True,blank=True)
@@ -79,6 +94,15 @@ class Backups(models.Model):
             return self.FileName
     def get_absolute_url(self):
         return "/backup/update/%i" % self.id
+    
+    def days_old(self):
+        today=date.today().strftime('%Y-%m-%d')
+        backup_date=datetime.strftime(self.CreationDate,'%Y-%m-%d')
+        today=parser.parse(today)
+        backup_date=parser.parse(backup_date)  
+        diff=today-backup_date
+        days_old=(diff.days)
+        return days_old
   
 
 class RotationRules(models.Model):
@@ -94,10 +118,16 @@ class RotationRules(models.Model):
     ZipFile=models.BooleanField(default=False, help_text='Compress backup file on arrival ',verbose_name='Compress file?')
     ZipFormat= models.SmallIntegerField(choices=COMPRESS_FORMAT,default=1);
     
-    class Meta:
-        db_table='backup_rotationrules'
-        verbose_name_plural = "Rotation rules"
-        ordering = ['Job', 'Order']
-
     def __str__(self):
-        return  self.RuleName 
+        return  self.RuleName +' - ' +  str(self.RetentionDays)
+
+    def prev_rule(self):
+        next_step=RotationRules.objects.filter(Order__gt=self.Order).order_by('Order')[:1]
+        if(next_step):
+            return next_step
+        else:
+            return None
+        
+    def next_rule(self):
+        pass    
+
