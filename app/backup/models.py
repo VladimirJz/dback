@@ -39,7 +39,7 @@ class Jobs(models.Model):
     JobName=models.CharField(max_length=50,help_text='Backup Job name');
     Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True,blank=True)
     Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True,blank=True)
-    IsLocal=models.BooleanField(default=False, help_text='Is a local drive backup? ',verbose_name='Local backup')
+    IsLocal=models.BooleanField(default=False, help_text='add to local backup tool ',verbose_name='Run on local backup service.')
     UseByPassDir=models.BooleanField(default=False, help_text='Use a bypass Dir? ',verbose_name='Use temporaly Dir')
     ByPassDir=models.CharField(max_length=200, help_text='Generate backup and move it later to Destination Dir',verbose_name='Temporaly Dir',blank=True,null=True)
 
@@ -56,7 +56,8 @@ class JobSchedule(models.Model):
     Schedule=models.SmallIntegerField(choices=SCHEDULE,default=1);
     
     def __str__(self):
-        job=Jobs.objects.get(id=4)
+        job=Jobs.objects.get(id=self.Job.id)
+
         return job.JobName +' - '+ self.get_Schedule_display()
    
     class Meta:
