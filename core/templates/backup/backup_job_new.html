@@ -1,0 +1,15 @@
+<P>BACKUPS JOBS</P>
+
+{% for back in backups %}
+<p>
+
+    {{ back.id }}
+</p>
+<h4>{{ back.FileName }}</h4>
+{% endfor %}
+<form name='formulario' method="POST">
+    <input type="text" name="caja_texto">
+
+    {%  csrf_token %}
+<button type="submit" value="ENVIAR">ENVAR</button>
+</form>

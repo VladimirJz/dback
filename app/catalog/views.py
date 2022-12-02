@@ -6,10 +6,10 @@ from django.shortcuts import render,reverse
 from django.contrib import messages
 from django.views.generic import ListView,TemplateView,DetailView,CreateView,UpdateView,DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
-from app.catalog.models import DataBases, Servers, Tables
+from app.catalog.models import DataBases, Servers, Tables,Credentials
 from app.tracking.models import TablesDetail
 from django.urls import resolve
-from app.catalog.forms import NewServerForm
+from app.catalog.forms import NewServerForm,NewDataBaseForm, NewCredentialForm
 from core.utils import get_breadcrumb
 
 
@@ -60,7 +60,8 @@ class ServerListView(ListView): #not
     model=Servers
     template_name='catalog/servers_list.html'
     context_object_name ='servers_list'
-    queryset =  Servers.objects.all().values('id','Server','Host','Instance','Port','Type','Environment','Status')
+    #queryset =  Servers.objects.all().values('id','Server','Host','Instance','Port','Type','Environment','Status')
+
 
 
     def get_context_data(self, **kwargs):
@@ -74,10 +75,36 @@ class ServerListView(ListView): #not
         context['app']=app
         return context
 
+
+
+class CredentialListView(ListView):
+    model=Credentials
+    template_name='catalog/credentials_list.html'
+    context_object_name ='credential_list'
+    #queryset =  DataBases.objects.all().values('id','Database','FriendlyName','Description','CreateDate','DataSizeMB','TablesNum','Server')
+   
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        app='catalog'
+        menu='credentials'
+        current_url = self.request.resolver_match.url_name
+        breadcrumb=get_breadcrumb(current_url)
+        context['breadcrumb']=breadcrumb
+        context['current_url']=current_url
+        context['menu']=menu
+        context['app']=app
+       # context['choices']=choices
+        return context
+
+
+
+
 class ServerDetailView(DetailView):
     model = Servers
     template_name='catalog/servers_detail.html'
     context_object_name = 'server_detail'
+    #queryset=Servers.objects.all().values('id','Server','Host','get_Type_display','Port','Instance')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -137,6 +164,14 @@ class ServerCreateView( SuccessMessageMixin,CreateView):
         context['go_back']=go_back
         return context
 
+
+class CredentialCreateView( SuccessMessageMixin, CreateView):
+    model=Credentials
+    template_name= 'catalog/credentials_new.html'
+    form_class=NewCredentialForm
+
+
+
 class ServerDeleteView(SuccessMessageMixin,DeleteView):
     # specify the model you want to use
     model = Servers
@@ -164,7 +199,7 @@ class DataBaseListView(ListView):
     model=DataBases
     template_name='catalog/databases_list.html'
     context_object_name ='databases_list'
-    queryset =  DataBases.objects.all().values('id','Database','FriendlyName','Description','CreateDate','DataSizeMB','TablesNum','Server')
+    #queryset =  DataBases.objects.all().values('id','Database','FriendlyName','Description','CreateDate','DataSizeMB','TablesNum','Server')
    
 
     def get_context_data(self, **kwargs):
@@ -179,3 +214,24 @@ class DataBaseListView(ListView):
         context['app']=app
        # context['choices']=choices
         return context
+
+
+class DataBaseCreateView(SuccessMessageMixin,CreateView):
+    model=DataBases
+    form_class=NewDataBaseForm
+    template_name='catalog/databases_new.html'
+    success_url= "/servers/databases/new"
+ 
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            app='catalog'
+            menu='databases'
+            current_url = self.request.resolver_match.url_name
+            breadcrumb=get_breadcrumb(current_url)
+            context['breadcrumb']=breadcrumb
+            context ['menu']=menu
+            context['app']=app
+
+            go_back='/servers/databases/'
+            context['go_back']=go_back
+            return context

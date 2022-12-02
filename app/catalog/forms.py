@@ -1,5 +1,5 @@
 #from django import forms
-from app.catalog.models import Servers
+from app.catalog.models import Servers,DataBases,Credentials
 import floppyforms as forms
 import floppyforms.__future__ as forms
 from floppyforms import widgets
@@ -9,6 +9,15 @@ class NewServerForm(forms.ModelForm):
      class Meta:
         model = Servers
         fields = ('__all__')
+class NewDataBaseForm(forms.ModelForm):
+     class Meta:
+          model= DataBases
+          fields=('__all__')
+
+class NewCredentialForm(forms.ModelForm):
+     class Meta:
+          model= Credentials
+          fields=('__all__')
 
      #    fields=('Server','Host','Instance',)
      #    widgets={'Server':widgets.TextInput(),

@@ -17,7 +17,7 @@
 
     <h2 class="yoo-uikits-title">
         {% if menu == "backup" %}
-        All backups
+        Lastest Backups
         {% elif menu == "update" %}
         Lost backups
         {% endif %}
@@ -49,10 +49,14 @@
                   <tr>
                   <th scope="col"></th>
                   <th scope="col">id</th>
+                  <th scope="col">Database</th>
                   <th scope="col">Filename</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Size</th>
                   <th scope="col">Location</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Comments</th>
+                  
+                  
                   <th scope="col"></th>
                 </tr>
               </thead>
@@ -64,25 +68,63 @@
                         <input name="selected" class="custom-control-input" type='checkbox'  value="{{ backup.id }}"></input>
                         {% endif %}
                     </td>
-                  <th scope="row"  >{{ backup.id}}</th>
+                  <th scope="row"  >  {{ backup.id }}</th>
+                  <td>{{ backup.Database}}</td>
                   <td>{{ backup.FileName}}</td>
+                  <td>{{ backup.CreationDate}}</td>
+                  <td>{{backup.SizeMB}}</td>
                   <td>{{ backup.Location}}</td>
                   <td >{{ backup.Status}}</td>
-                  <td>{{ backup.Comments}}</td>
                   <td> 
                     {% if menu == "update" %}
                     <button type="button" onclick="location.href='#';" class="yoo-card-btn"><ion-icon name="create-outline"></ion-icon></button>
                     {% endif %}
+                    <button type="button" onclick="location.href='#';" class="yoo-card-btn"><ion-icon name="warning-outline"></ion-icon></ion-icon></button>
+
                   </td>
                 </tr>
 
                 {% endfor %}
             </tbody>
         </table>
+        <!--    -->
+        
+  
         <!-- table end-->
         
             <div class="modal-footer">
-             
+              {% if is_paginated %}
+              <nav aria-label="...">
+              <ul class="pagination">
+                {% if page_obj.has_previous %}
+                  <li class="page-item" ><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+                {% else %}
+                  <li class="page-item disabled"><span><a class="page-link" href="#">&laquo;</a></span></li>
+                {% endif %}
+                {% for i in paginator.page_range %}
+                  {% if page_obj.number == i %}
+                    <li class="page-item active">
+                      <span>
+                        
+                        <a class="page-link" href="#" tabindex="-1">{{ i }}</a>
+                        <span class="sr-only">(current)</span></span>
+                    </li>
+                  {% else %}
+                    <li class="page-item"><a class="page-link"  href="?page={{ i }}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                  <li class="page-item" ><a class="page-link"  href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                {% else %}
+                  <li class="page-item disabled"><span>
+                   
+                    <a class="page-link" href="#"> &raquo;</a>
+                  </span></li>
+                {% endif %}
+              </ul>
+            </nav>
+            {% endif %}
+            
             </div>
             
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
@@ -96,6 +138,10 @@
 </div>
 </div>
 <div class="yoo-height-b30 yoo-height-lg-b30"></div>
+
+
+
+
 
 
 

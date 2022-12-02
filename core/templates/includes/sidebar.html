@@ -28,14 +28,14 @@
         </a>
         <ul class="yoo-sidebar-nav-dropdown">
           <!-- sub Menu-->  
-          <li >
+          <!-- <li >
             <a href="#">
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="layers"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Dashboard</span>
               </span>
             </a>
-          </li>
+          </li> -->
           <!-- sub Menu -->
           <li {% if menu == "servers" %}class="active"{% endif%}>       
             <a href="{% url 'servers'%}">
@@ -51,6 +51,22 @@
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="server-outline"></ion-icon></span>
                 <span class="yoo-sidebar-link-text">Databases</span>
+              </span>
+            </a>
+          </li>
+          <li {% if menu == "locations" %}class="active"{% endif%}>       
+            <a href="{%url 'backup_locations' %}">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="folder-open-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Locations</span>
+              </span>
+            </a>
+          </li>
+          <li {% if menu == "credentials" %}class="active"{% endif%}>       
+            <a href="{%url 'servers_credentials' %}">
+              <span class="yoo-sidebar-link-title">
+                <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="finger-print-outline"></ion-icon></span>
+                <span class="yoo-sidebar-link-text">Credentials</span>
               </span>
             </a>
           </li>
@@ -72,7 +88,7 @@
             <a href="{%url 'backup' %}">
               <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="calendar-outline"></ion-icon></span>
-                <span class="yoo-sidebar-link-text">All Backups</span>
+                <span class="yoo-sidebar-link-text">Available</span>
               </span>
             </a>
           </li> 
@@ -132,7 +148,7 @@
             </li>
 
         <!--Main Menu --> 
-        <li class="yoo-sidebar-has-children"  {% if app == "inventory" %}class="active"{% endif%}>
+        <!-- <li class="yoo-sidebar-has-children"  {% if app == "inventory" %}class="active"{% endif%}>
             <a href="#" >
             <span class="yoo-sidebar-link-title">
                 <span class="yoo-sidebar-link-icon yoo-style1"><ion-icon name="archive-outline"></ion-icon></span>
@@ -141,7 +157,7 @@
             </a>
             <ul class="yoo-sidebar-nav-dropdown">
             <!-- sub Menu-->  
-            <li {% if menu == "dashboard" %}class="active"{% endif%}>
+            <!-- <li {% if menu == "dashboard" %}class="active"{% endif%}>
                 <a href="{%url 'inventory' %}">
                 <span class="yoo-sidebar-link-title">
                     <span class="yoo-sidebar-link-icon yoo-style1"><i class="fas fa-warehouse fa-lg"></i></span>
@@ -150,8 +166,8 @@
                 </a>
             </li> 
             </ul>
-            </li>
-      
+            </li> -->
+     
         <!-- logout-->
           <!-- SIDE BAR ITEM-->         
           <li>

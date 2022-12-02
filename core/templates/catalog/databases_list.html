@@ -36,7 +36,7 @@
               <thead>
                 <tr>
                   <th scope="col">id</th>
-                  <th scope="col">Database</th>
+                  <th scope="col">user</th>
                   <th scope="col">Friendly Name</th>
                   <th scope="col">Description</th>
                   <th scope="col">Server</th>
@@ -65,7 +65,9 @@
             </table>
             <!-- table end-->
             
-
+            <div class="modal-footer">
+              <button type="button" onclick="location.href='{% url 'servers_databases_new' %}'" class="btn btn-success" data-dismiss="modal">New</button>
+            </div>
 
             <div class="yoo-height-b20 yoo-height-lg-b20"></div>
           </div>

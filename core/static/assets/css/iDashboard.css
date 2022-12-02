@@ -5171,7 +5171,8 @@ scrollbar .scrollbar-thumb,
 
 /* End Sidebar heading Toggle Function */
 .yoo-sidebar-nav-list li {
-  padding-bottom: 5px; }
+  /*padding-bottom: 5px;*/
+  margin-bottom: 0; }
   .yoo-sidebar-nav-list li:last-child {
     padding-bottom: 0; }
 

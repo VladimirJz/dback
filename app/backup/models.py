@@ -4,7 +4,7 @@ from django.db.models.deletion import CASCADE
 from django.db.models.fields import CharField, DateTimeField, SmallIntegerField
 from django.db.models.fields.related import ForeignKey
 from app.catalog.models import Tables,DataBases
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,date
 from dateutil import parser
 # Create your models here.
 
@@ -39,7 +39,8 @@ class Jobs(models.Model):
     JobName=models.CharField(max_length=50,help_text='Backup Job name');
     Database=models.ForeignKey(DataBases,on_delete=models.SET_NULL,null=True,blank=True)
     Location=models.ForeignKey(Locations,on_delete=models.SET_NULL,null=True,blank=True)
-    IsLocal=models.BooleanField(default=False, help_text='add to local backup tool ',verbose_name='Run on local backup service.')
+    IsLocal=models.BooleanField(default=False, help_text='A DB Engine task run the backup',verbose_name='Run on self DB server.')
+    UseRemotePath=models.BooleanField(default=True, help_text='Saves on a network destination', verbose_name='Use the remote path location.')
     UseByPassDir=models.BooleanField(default=False, help_text='Use a bypass Dir? ',verbose_name='Use temporaly Dir')
     ByPassDir=models.CharField(max_length=200, help_text='Generate backup and move it later to Destination Dir',verbose_name='Temporaly Dir',blank=True,null=True)
 
@@ -90,12 +91,15 @@ class Backups(models.Model):
     class Meta:
         db_table = "backup_files"
         verbose_name_plural = "Backups"
+    def lastest(self):
 
+        return
     def __str__(self):
             return self.FileName
     def get_absolute_url(self):
         return "/backup/update/%i" % self.id
     
+    @classmethod
     def days_old(self):
         today=date.today().strftime('%Y-%m-%d')
         backup_date=datetime.strftime(self.CreationDate,'%Y-%m-%d')
@@ -103,6 +107,7 @@ class Backups(models.Model):
         backup_date=parser.parse(backup_date)  
         diff=today-backup_date
         days_old=(diff.days)
+        #delta = datetime.now().date() - self.StartBackup
         return days_old
   
 

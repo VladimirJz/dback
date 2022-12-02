@@ -202,8 +202,9 @@ class backup():
 
         print('')
         print(">> Ejecutando Jobs de respaldo.")
-        #schedules=JobSchedule.objects.all().select_related('Job')
-        schedules=JobSchedule.objects.filter(Schedule=2)
+        schedules=JobSchedule.objects.all().select_related('Job')
+        #schedules=JobSchedule.objects.filter(UseRemotePath==True).select_related('Job')
+       # schedules=JobSchedule.objects.filter(Schedule=2)
         print('   Jobs activos:',schedules.count())
         for  schedule in schedules:
             print('')
@@ -211,6 +212,7 @@ class backup():
             job=schedule.Job
             type=str(schedule.get_Schedule_display())
             is_local=(schedule.Job.IsLocal)
+            network_save=(schedule.Job.UseRemotePath)
             use_bypass_dir=(schedule.Job.UseByPassDir)
             bypass_dir=(schedule.Job.ByPassDir)
             absolute_path=(schedule.Job.Location.AbsolutePath)
@@ -220,10 +222,11 @@ class backup():
             database_name=schedule.Job.Database.Database
             database_id=schedule.Job.Database.id
             print("Running job [" + type + "], for database " + database_name)
-            database=DataBases.objects.only('Server__id','Server__Host','Server__Type').get(id=database_id)
+            database=DataBases.objects.only('Server__id','Server__Host','Server__Type','Server__Port').get(id=database_id)
             server_host=database.Server.Host
             server_type=database.Server.get_Type_display()
             server_type_id=database.Server.Type
+            server_port=database.Server.Port
             
             print("[>>] Server:", server_host," (", server_type,")")
             backup_file_name=database_name
@@ -241,7 +244,7 @@ class backup():
                 path=MARIADB_MYSQLDUMP_PATH
                 exe=MYSQLDUMP
                 login_params='-u ' + user + ' -p' + passw
-                host_params='-h ' + server_host
+                host_params='-h ' + server_host + ' -P' + str(server_port)
                 database_params=database_name
                 
                 
@@ -258,10 +261,11 @@ class backup():
             print("[>>] Utilieria :", exe)
             
             target='>'
-            if(is_local):
-                backup_path=absolute_path
-            else:
+            if(network_save):
                 backup_path=remote_path
+            else:
+                backup_path=absolute_path
+                
 
             
             print("[>>] Registrando backup.")
