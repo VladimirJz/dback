@@ -53,7 +53,7 @@ class Jobs(models.Model):
 
 class JobSchedule(models.Model):
     Job=models.ForeignKey(Jobs,on_delete=models.SET_NULL,null=True);
-    SCHEDULE = [(1, 'Daily'),(2, 'Weekend'),];
+    SCHEDULE = [(1, 'Daily'),(2, 'Weekend'),(3, 'Montly'),];
     Schedule=models.SmallIntegerField(choices=SCHEDULE,default=1);
     
     def __str__(self):
