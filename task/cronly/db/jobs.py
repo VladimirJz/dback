@@ -4,6 +4,8 @@ import sys
 import django
 from django.db.models import Value
 from django.db.models import Count, F, Value
+from datetime import datetime,date
+from dateutil.relativedelta import relativedelta
 
 sys.dont_write_bytecode = True
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
@@ -181,6 +183,8 @@ class backup():
         MYSQLDUMP='mysqldump.exe'
         PGADMIN_PGDUMP_PATH="""C:\\Program Files\\pgAdmin 4\\v6\\runtime"""
         PGDUMP="pg_dump.exe"
+        MONGODBDUMP_PATH="""C:\\Program Files\\MongoDB\\Tools\\100\\bin"""
+        MONGODBDUMP='mongodump.exe'
         
         #
         SUCCESS_MESSAGE='Backup generado correctamente.'
@@ -190,7 +194,8 @@ class backup():
         #status
         AVAILABLE=1
         DONTEXISTS=2
-        
+        today= date.today()
+        last_day = today + relativedelta(day=31)
 
 
 
@@ -211,146 +216,170 @@ class backup():
             print(':::::::::::::::::::::::::::::::::')
             job=schedule.Job
             type=str(schedule.get_Schedule_display())
-            is_local=(schedule.Job.IsLocal)
-            network_save=(schedule.Job.UseRemotePath)
-            use_bypass_dir=(schedule.Job.UseByPassDir)
-            bypass_dir=(schedule.Job.ByPassDir)
-            absolute_path=(schedule.Job.Location.AbsolutePath)
-            remote_path=schedule.Job.Location.RemotePath
-            location=schedule.Job.Location
-            print(remote_path)
-            database_name=schedule.Job.Database.Database
-            database_id=schedule.Job.Database.id
-            print("Running job [" + type + "], for database " + database_name)
-            database=DataBases.objects.only('Server__id','Server__Host','Server__Type','Server__Port').get(id=database_id)
-            server_host=database.Server.Host
-            server_type=database.Server.get_Type_display()
-            server_type_id=database.Server.Type
-            server_port=database.Server.Port
-            
-            print("[>>] Server:", server_host," (", server_type,")")
-            backup_file_name=database_name
+            type_id=schedule.Schedule
+            print(type_id)
+            if (type_id==1 or (type_id==2 and today.weekday() == 5) or (type_id==3 and today==last_day)):
+            #if (type_id==3 ):
 
-            credentials=Credentials.objects.get(Server_id=database.Server_id)
-            user=credentials.User
-            passw=credentials.Pass
-            params=[]
-
-            
-          
-
-            if server_type_id==2 :
-                precommand=''
-                path=MARIADB_MYSQLDUMP_PATH
-                exe=MYSQLDUMP
-                login_params='-u ' + user + ' -p' + passw
-                host_params='-h ' + server_host + ' -P' + str(server_port)
-                database_params=database_name
+                is_local=(schedule.Job.IsLocal)
+                network_save=(schedule.Job.UseRemotePath)
+                use_bypass_dir=(schedule.Job.UseByPassDir)
+                bypass_dir=(schedule.Job.ByPassDir)
+                absolute_path=(schedule.Job.Location.AbsolutePath)
+                remote_path=schedule.Job.Location.RemotePath
+                location=schedule.Job.Location
+                print(remote_path)
+                database_name=schedule.Job.Database.Database
+                database_id=schedule.Job.Database.id
+                print("Running job [" + type + "], for database " + database_name)
+                database=DataBases.objects.only('Server__id','Server__Host','Server__Type','Server__Port').get(id=database_id)
+                server_host=database.Server.Host
+                server_type=database.Server.get_Type_display()
+                server_type_id=database.Server.Type
+                server_port=database.Server.Port
                 
+                print("[>>] Server:", server_host," (", server_type,")")
+                backup_file_name=database_name
+
+                credentials=Credentials.objects.get(Server_id=database.Server_id)
+                user=credentials.User
+                passw=credentials.Pass
+                params=[]
+
                 
-            if server_type_id==3 :
-                path=PGADMIN_PGDUMP_PATH
-                exe=PGDUMP
-                precommand='set PGPASSWORD=' + passw + '&&'
-                login_params='-U ' + user  
-                host_params='-h ' + server_host
-                database_params='-d ' + database_name
+              
 
-            
-            path_exe=path +'\\'+ exe
-            print("[>>] Utilieria :", exe)
-            
-            target='>'
-            if(network_save):
-                backup_path=remote_path
-            else:
-                backup_path=absolute_path
-                
-
-            
-            print("[>>] Registrando backup.")
-            backup_file_name=database_name +'_' +  backup_date + '.sql'
-            full_backup_name=backup_path + '\\' + backup_file_name
-            backup=Backups.objects.create(Job=job,
-                                        Database=database,
-                                        Status_id=AVAILABLE,
-                                        Location=location,
-                                        CreationDate=datetime.today(),
-                                        StartBackup=datetime.now(),
-                                        FileName=backup_file_name)
-
-
-            backup.save()
-            if(os.path.exists(path_exe)):   
-                
-                path_exe='"' + path_exe + '"'
-                params.append(precommand)
-                params.append(path_exe)
-                params.append(login_params)
-                params.append(host_params)
-                params.append(database_params)
-                params.append('>')
-                params.append(full_backup_name)
-                #print(user,passw)
-                #print (params)
-                backup_command=' '.join(params)
-                print(backup_command)
-                print("[>>] Ejecutando Job.")
-                print("     " + path_exe)
-                #subprocess.call([path_exe,],shell=True)
-                #subprocess.call([path_exe,"-u","remote","-p12345","-h","10.186.1.154","--compact","test_b"," > "+r"C:\respaldo\recursos_materiales_20220304_2.sql" ])
-                print (backup_command)
-
-                os.system(backup_command)
+                if server_type_id==2 :
+                    precommand=''
+                    path=MARIADB_MYSQLDUMP_PATH
+                    exe=MYSQLDUMP
+                    login_params='-u ' + user + ' -p' + passw
+                    host_params='-h ' + server_host + ' -P' + str(server_port)
+                    database_params=database_name
+                    output_indicator='>'
                     
-                    # look for the file.
+                    
+                if server_type_id==3 :
+                    path=PGADMIN_PGDUMP_PATH
+                    exe=PGDUMP
+                    precommand='set PGPASSWORD=' + passw + '&&'
+                    login_params='-U ' + user  
+                    host_params='-h ' + server_host
+                    database_params='-d ' + database_name
+                    output_indicator='>'
+                    
+                if server_type_id==4:
+                    precommand=''
+                    path=MONGODBDUMP_PATH
+                    exe=MONGODBDUMP
+                    login_params=' /username:' + user + ' /password:' + passw + ' /authenticationDatabase:admin'
+                    host_params='/host:' + server_host + ' /port:' + str(server_port)
+                    database_params=' /db:' + database_name
+                    output_indicator=' /archive:'
 
-                if(os.path.exists(full_backup_name)):
-                    print("[>>] Backup generado.")
-                    size=os.path.getsize(full_backup_name)
-                    if(size>0):
-                        size_mb=size/1024/1000
-                    else:
-                        print("[--] El archivo esta dañado, " + backup_file_name)
-                        ERROR_MESSAGE='Error: El archivo esta vacio ' + backup_file_name
+
+                #mongodump /username:manager /password:asjhdlREt560h  /authenticationDatabase:admin /host:172.16.3.126 /port:27017 /db:repo-documents /archive:\\172.16.10.70\ARCHIVO_DOCUMENTOS\repo-documents_240123.bak
+
+                path_exe=path +'\\'+ exe
+                print("[>>] Utilieria :", exe)
+                
+                target='>'
+                if(network_save):
+                    backup_path=remote_path
                 else:
-                    if(os.path.exists(backup_path)):
-                        print("[--] El archivo no existe, ", backup_file_name)
-                        ERROR_MESSAGE='Error :El backup no fue generado ' + backup_file_name
+                    backup_path=absolute_path
+                    
+
+                
+                print("[>>] Registrando backup.")
+                backup_file_name=database_name +'_' +  backup_date + '.sql'
+                full_backup_name=backup_path + '\\' + backup_file_name
+                backup=Backups.objects.create(Job=job,
+                                            Database=database,
+                                            Status_id=AVAILABLE,
+                                            Location=location,
+                                            CreationDate=datetime.today(),
+                                            StartBackup=datetime.now(),
+                                            FileName=backup_file_name)
+
+
+                backup.save()
+                if(os.path.exists(path_exe)):   
+                    
+                    path_exe='"' + path_exe + '"'
+                    params.append(precommand)
+                    params.append(path_exe)
+                    params.append(login_params)
+                    params.append(host_params)
+                    params.append(database_params)
+                    params.append('>')
+                    params.append(full_backup_name)
+                    #print(user,passw)
+                    #print (params)
+                    backup_command=' '.join(params)
+                    print(backup_command)
+                    print("[>>] Ejecutando Job.")
+                    print("     " + path_exe)
+                    #subprocess.call([path_exe,],shell=True)
+                    #subprocess.call([path_exe,"-u","remote","-p12345","-h","10.186.1.154","--compact","test_b"," > "+r"C:\respaldo\recursos_materiales_20220304_2.sql" ])
+                    print (backup_command)
+
+                    os.system(backup_command)
+                        
+                        # look for the file.
+
+                    if(os.path.exists(full_backup_name)):
+                        print("[>>] Backup generado.")
+                        size=os.path.getsize(full_backup_name)
+                        if(size>0):
+                            size_mb=size/1024/1000
+                        else:
+                            if(os.path.exists(full_backup_name)):
+                                size=os.path.getsize(full_backup_name)
+                                if(size>0):
+                                    size_mb=size/1024/1000
+
+                            else:
+                                print("[--] El archivo esta dañado, " + backup_file_name)
+                                ERROR_MESSAGE='Error: El archivo esta vacio ' + backup_file_name
                     else:
-                        print("[--] No se tiene acceso a la ubicación: " + backup_path )
-                        ERROR_MESSAGE='Error :El directorio destino no esta disponible ' + backup_path
+                        if(os.path.exists(backup_path)):
+                            print("[--] El archivo no existe, ", backup_file_name)
+                            ERROR_MESSAGE='Error :El backup no fue generado ' + backup_file_name
+                        else:
+                            print("[--] No se tiene acceso a la ubicación: " + backup_path )
+                            ERROR_MESSAGE='Error :El directorio destino no esta disponible ' + backup_path
 
 
-                if(ERROR_MESSAGE):
+                    if(ERROR_MESSAGE):
+                        MESSAGE=ERROR_MESSAGE
+                        STATUS=ERROR_STATUS
+                        size=0
+                        size_mb=0
+                        print("[--] Error al generar el backup, " + backup_file_name)
+                        
+                    else:
+                        MESSAGE=SUCCESS_MESSAGE
+                        STATUS=SUCCESS_STATUS
+                        print("[>>] Backup generado correctamente,  " + backup_file_name)
+                    
+                else:
+                    ERROR_MESSAGE="Error: No se encontro la utileria " + exe
                     MESSAGE=ERROR_MESSAGE
                     STATUS=ERROR_STATUS
-                    size=0
-                    size_mb=0
+                    print("[--] Error: No se encontro la utileria " + exe)
+                    print 
                     print("[--] Error al generar el backup, " + backup_file_name)
-                    
-                else:
-                    MESSAGE=SUCCESS_MESSAGE
-                    STATUS=SUCCESS_STATUS
-                    print("[>>] Backup generado correctamente,  " + backup_file_name)
                 
-            else:
-                ERROR_MESSAGE="Error: No se encontro la utileria " + exe
-                MESSAGE=ERROR_MESSAGE
-                STATUS=ERROR_STATUS
-                print("[--] Error: No se encontro la utileria " + exe)
-                print 
-                print("[--] Error al generar el backup, " + backup_file_name)
-            
-            Backups.objects.filter(id=backup.id).update(Status_id=STATUS,
-                                                        Size=size,
-                                                        SizeMB=size_mb,
-                                                        EndBackup=datetime.now(),
-                                                        Updated=datetime.now(),
-                                                        Comments=MESSAGE)
+                Backups.objects.filter(id=backup.id).update(Status_id=STATUS,
+                                                            Size=size,
+                                                            SizeMB=size_mb,
+                                                            EndBackup=datetime.now(),
+                                                            Updated=datetime.now(),
+                                                            Comments=MESSAGE)
 
 
-            print("[>>] Bitacora actualizada, " + backup_file_name)
+                print("[>>] Bitacora actualizada, " + backup_file_name)
 
 
 
